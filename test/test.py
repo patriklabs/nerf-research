@@ -22,8 +22,8 @@ def test_resample():
 
     t = torch.linspace(0, 20, 64).reshape(1, 64, 1)
 
-    mean = 13.0
-    std = 3.0
+    mean = 8.0
+    std = 3
 
     w = torch.exp(-((t-mean)/std).pow(2))
 
@@ -37,8 +37,10 @@ def test_resample():
 
     fig, axs = plt.subplots(3)
     fig.suptitle('test')
-    axs[0].hist(t_smp, range=[0, 20])
+    axs[0].hist(t_smp)
+    axs[0].set_xlim([0, 20])
     axs[1].plot(t, w)
+    axs[1].set_xlim([0, 20])
     axs[2].plot(t_smp, np.zeros_like(t_smp), "*")
     axs[2].set_xlim([0, 20])
 
