@@ -4,7 +4,7 @@ from distutils.util import strtobool
 import pytorch_lightning as pl
 import torch
 
-from nerf.nerf.nerf import Nerf
+from nerf.nerf.nerf_hypothesis import Nerf
 from nerf_visualizer import NerfVisualizer
 from train.LiNerf import LiNerf
 from train.trainer import Trainer
