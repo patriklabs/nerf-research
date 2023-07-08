@@ -4,13 +4,13 @@ from nerf.util.util import where
 
 def kl_gauss(t, w, pi, mu, std):
 
-    std = std.clamp_min(1e-3)
+    std = std.clamp_min(1e-6)
 
     q = pi*torch.exp(-0.5*((t-mu)/(std))**2)/((std)*2.50662827463)
 
     q = q.sum(-1, keepdim=True)
 
-    div = -w*torch.log(q.clamp_min(1e-4))
+    div = -w*torch.log(q.clamp_min(1e-6))
 
     return div.mean(1)
 

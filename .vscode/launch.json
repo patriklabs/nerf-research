@@ -16,9 +16,12 @@
                 "--devices=1",
                 "--homogeneous_projection=True",
                 "--batch=1024",
-                "--dataset_path=/database/nerf_dataset/gate",
-                //"--model_path=/workspace/lightning_logs/version_29/checkpoints/epoch=2-step=4050.ckpt",
+                "--dataset_path=/database/nerf_dataset/fountain",
+                //"--model_path=/workspace/lightning_logs/version_55/checkpoints/epoch=119-step=84000.ckpt",
                 "--accumulate_grad_batches=2",
+                "--reg_weight=1.0",
+                "--lr=0.0001",
+                "--max_epochs=200"
                 //"--detect_anomaly=True"
             ],
             "justMyCode": false
@@ -35,7 +38,7 @@
                 "--homogeneous_projection=True",
                 "--batch=1024",
                 "--dataset_path=/database/nerf_dataset/gate",
-                "--model_path=/workspace/lightning_logs/version_54/checkpoints/epoch=4-step=6750.ckpt",
+                "--model_path=/workspace/lightning_logs/version_0/checkpoints/epoch=187-step=131600.ckpt",
                 "--accumulate_grad_batches=2",
                 "--visualize=True",
                 "--threshold=50"

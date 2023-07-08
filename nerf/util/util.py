@@ -49,6 +49,43 @@ def uniform_sample(tn, tf, N: int):
     return uniform(a, b)
 
 
+def resample_new(w, t, N):
+
+    c = w.sum(1, keepdim=True)
+    w = w/where(c > 0, c, torch.ones_like(c))
+
+    cdf = torch.cumsum(w, dim=1)
+
+    cdf = torch.cat((torch.zeros_like(cdf[:, :1]), cdf), dim=1)
+
+    B, S = w.shape[0:2]
+
+    u = torch.rand((B, N), device=w.device, dtype=w.dtype)
+
+    idx = torch.searchsorted(cdf.squeeze(-1), u, right=True).unsqueeze(-1)
+
+    cdf1 = torch.gather(cdf, 1, (idx - 1).clamp(0, S-1))
+    w1 = torch.gather(w, 1, (idx - 1).clamp(0, S-1))
+    t1 = torch.gather(t, 1, (idx - 1).clamp(0, S-1))
+
+    t2 = torch.gather(t, 1, idx.clamp(0, S-1))
+
+    #cdf2 = torch.gather(cdf, 1, (idx).clamp(0, S-1))
+
+    u = u.unsqueeze(-1)
+
+    # u = k*t + m
+    w1 = w1
+    w1 = where(w1 > 0, w1, torch.ones_like(w1))
+    m = cdf1
+
+    tu = (u-m)/w1
+
+    t = t1 + tu*(t2-t1)
+
+    return t.clamp(t1, t2)
+
+
 def resample(w, t, N: int):
 
     t1 = t[:, :-1]
@@ -116,7 +153,7 @@ def resample(w, t, N: int):
     qq = (b**2-4*a*c).clamp_min(0)
 
     tu1 = (-b+torch.sqrt(qq))/(2*a)
-    #tu2 = (-b-torch.sqrt(qq))/(2*a)
+    # tu2 = (-b-torch.sqrt(qq))/(2*a)
 
     mask2 = b.abs() > 0
 
@@ -127,7 +164,7 @@ def resample(w, t, N: int):
     tu = where(mask1, tu1, tu3)
     tu = where(mask2.logical_or(mask1), tu, torch.zeros_like(tu))
 
-    #tu = t1 + tu
+    # tu = t1 + tu
 
     return tu.clamp(t1, t2)
 

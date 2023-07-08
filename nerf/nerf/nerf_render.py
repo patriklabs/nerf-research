@@ -5,7 +5,7 @@ from nerf.nerf import NerfColor, NerfDensity
 from nerf.util.util import ray_to_points, where
 
 
-def integrate_ray(t: torch.Tensor, sigma, c, infinite: bool = False, normalize: bool = False):
+def integrate_ray(t: torch.Tensor, sigma, color, infinite: bool = False):
 
     dt = t[..., 1:, :] - t[..., :-1, :]
 
@@ -30,15 +30,7 @@ def integrate_ray(t: torch.Tensor, sigma, c, infinite: bool = False, normalize: 
 
     wi = Ti*alpha
 
-    if normalize:
-
-        C = wi.sum(dim=-2, keepdim=True)
-
-        C = where(C > 0, C, torch.ones_like(C))
-
-        wi = wi/C
-
-    return (wi*c).sum(dim=-2), (wi*t).sum(dim=-2), wi, t
+    return (wi*color).sum(dim=-2), (wi*t).sum(dim=-2), wi, t
 
 
 class NerfRender(nn.Module):
@@ -50,15 +42,21 @@ class NerfRender(nn.Module):
 
         self.nerf_color = NerfColor(Ld)
 
-    def forward(self, ray, t):
-
-        t, _ = torch.sort(t, dim=-2)
+    def evaluate_ray(self, ray, t):
 
         x, d = ray_to_points(ray, t)
 
         sigma, F = self.nerf_density(x)
 
         color = self.nerf_color(F, d)
+
+        return sigma, color
+
+    def forward(self, ray, t):
+
+        t, _ = torch.sort(t, dim=-2)
+
+        sigma, color = self.evaluate_ray(ray, t)
 
         return integrate_ray(t, sigma, color)
 

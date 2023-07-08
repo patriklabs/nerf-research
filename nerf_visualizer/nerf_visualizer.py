@@ -21,12 +21,12 @@ class NerfVisualizer:
         parser.add_argument("--samples", type=int, default=256)
         parser.add_argument("--threshold", type=float, default=0.5)
         parser.add_argument("--name", type=str, default="output_mesh")
-        parser.add_argument("--x_min", type=float, default=-0.125)
-        parser.add_argument("--y_min", type=float, default=-0.125)
-        parser.add_argument("--z_min", type=float, default=-0.125)
-        parser.add_argument("--x_max", type=float, default=0.125)
-        parser.add_argument("--y_max", type=float, default=0.125)
-        parser.add_argument("--z_max", type=float, default=0.125)
+        parser.add_argument("--x_min", type=float, default=-0.5)
+        parser.add_argument("--y_min", type=float, default=-0.5)
+        parser.add_argument("--z_min", type=float, default=-0.5)
+        parser.add_argument("--x_max", type=float, default=0.5)
+        parser.add_argument("--y_max", type=float, default=0.5)
+        parser.add_argument("--z_max", type=float, default=0.5)
 
         return parent_parser
 

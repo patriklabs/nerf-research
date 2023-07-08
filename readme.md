@@ -1,4 +1,8 @@
 
+clone and run 
+
+    git submodule update --init --recursive
+
 Build colmap image
 
     /colmap/build_docker.sh

@@ -84,6 +84,6 @@ class Nerf(nn.Module):
         n1 = self.render.evaluate_normal(x_s)
         n2 = self.render.evaluate_normal(x_s+self.noise*torch.randn_like(x_s))
 
-        curv = (n1-n2).square().sum(-1)
+        reg_val = (n1-n2).square().sum(-1)
 
-        return {"color_high_res": color_high_res, "depth": depth, "curv": curv}
+        return {"color_high_res": color_high_res, "depth": depth, "reg_val": reg_val}

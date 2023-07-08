@@ -1,37 +1,20 @@
 
-from thirdparty.colmap.scripts.python.read_write_model import rotmat2qvec, Camera, read_model, Point3D
-
-from thirdparty.colmap.scripts.python.read_write_model import Image as colmap_image
-
-from dataset.sfm_solution import SFMSolution
+import os
+import random
 
 import numpy as np
-import os
-from PIL import Image
-from torch import nn
 import torch
+from PIL import Image as pil_image
+from torch import nn
+
+from dataset.util import to_homogen
+from thirdparty.colmap.scripts.python.read_write_model import (Camera, Image,
+                                                               Point3D,
+                                                               read_model,
+                                                               rotmat2qvec)
 
 
-def to_homogen(x):
-
-    return np.concatenate((x, np.ones_like(x[0:1])), axis=0)
-
-
-def to_K_matrix(intrinsics):
-
-    K = np.eye(4, 4)
-
-    fx, fy, cx, cy = intrinsics
-
-    K[0, 0] = fx
-    K[1, 1] = fy
-    K[0, 2] = cx
-    K[1, 2] = cy
-
-    return K
-
-
-def image_to_projection_matrix(image: colmap_image):
+def image_to_projection_matrix(image: Image):
 
     R = image.qvec2rotmat()
 
@@ -44,7 +27,7 @@ def image_to_projection_matrix(image: colmap_image):
     return P
 
 
-def image_to_camera_center(image: colmap_image):
+def image_to_camera_center(image: Image):
 
     R = image.qvec2rotmat()
 
@@ -57,32 +40,26 @@ def image_to_camera_center(image: colmap_image):
     return np.linalg.inv(P)[0:3, 3]
 
 
-def projection_matrix_to_image(P, image: colmap_image):
+def projection_matrix_to_image(P, image: Image):
 
     q = rotmat2qvec(P[0:3, 0:3])
     t = P[0:3, 3]
 
-    return colmap_image(id=image.id, qvec=q, tvec=t,
-                        camera_id=image.camera_id, name=image.name,
-                        xys=image.xys, point3D_ids=image.point3D_ids)
+    return Image(id=image.id, qvec=q, tvec=t,
+                 camera_id=image.camera_id, name=image.name,
+                 xys=image.xys, point3D_ids=image.point3D_ids)
 
 
-def iqr(x):
+class ColmapSolution:
 
-    q3, q1 = np.percentile(x, [75, 25], axis=-1)
+    def __init__(self, path, sol_nbr) -> None:
+        self.root_path = path
+        self.cameras, self.images, self.points = read_model(
+            os.path.join(path, "sparse", str(sol_nbr)))
 
-    iqr = q3 - q1
-
-    L = q1-1.5*iqr
-    U = q3+1.5*iqr
-
-    return L, U
-
-
-class Solution:
-
-    def __init__(self, path) -> None:
-        self.cameras, self.images, self.points = read_model(path)
+        self.cameras = {key: self.convert_camera(
+            camera) for key, camera in self.cameras.items()}
+        self.img_keys = list(self.images.keys())
 
     def unit_transformations(self):
 
@@ -99,10 +76,10 @@ class Solution:
 
         x_cen = x - x_mean
 
-        #s = np.max(np.abs(x_cen), keepdims=True)
+        # s = np.max(np.abs(x_cen), keepdims=True)
         s = np.max(np.linalg.norm(x_cen[0:3], axis=0), keepdims=True)
 
-        #s = iqr(np.abs(x_cen).reshape(-1))[1]
+        # s = iqr(np.abs(x_cen).reshape(-1))[1]
 
         T = np.eye(4, 4)
 
@@ -114,6 +91,7 @@ class Solution:
         T = 1/s*T
 
         ### test ###
+        """
 
         x = to_homogen(x)
         x = Tinv@x
@@ -123,7 +101,7 @@ class Solution:
         x_cen = x - x_mean
 
         s = np.max(np.linalg.norm(x_cen[0:3], axis=0), keepdims=True)
-
+        """
         return T, Tinv
 
     def unit_rescale(self):
@@ -147,7 +125,7 @@ class Solution:
                                        error=point.error, image_ids=point.image_ids,
                                        point2D_idxs=point.point2D_idxs)
 
-    def rescale(self, size):
+    def rescale_image(self, size):
 
         Ho, Wo = size
 
@@ -165,53 +143,48 @@ class Solution:
                                        width=Wo, height=Ho,
                                        params=intrinsics)
 
-    def get_points(self, image):
+    def convert_camera(self, camera: Camera):
+
+        intrinsics = None
+
+        if camera.model == "SIMPLE_RADIAL":
+            f, cx, cy, k1 = camera.params
+            # assuming that k1 is small enough to be ignored!
+            intrinsics = np.array([f, f, cx, cy])
+
+        elif camera.model == "PINHOLE":
+            intrinsics = camera.params
+        else:
+            raise Exception("camera model not recognized")
+
+        return Camera(id=camera.id,
+                      model="PINHOLE",
+                      width=camera.width,
+                      height=camera.height,
+                      params=intrinsics)
+
+    def get_points(self, image: Image):
 
         point3d = to_homogen(np.stack(
             [self.points[p_id].xyz for p_id in image.point3D_ids if p_id != -1], axis=-1))
 
         return point3d
 
-    def get_camera(self, image) -> Camera:
+    def get_camera(self, image: Image) -> Camera:
 
         return self.cameras[image.camera_id]
 
+    def load_image(self, image: Image):
 
-class ColmapSolution(SFMSolution):
+        img_path = os.path.join(self.root_path, "images", image.name)
 
-    def __init__(self, path_root, sol_nbr, size=None) -> None:
-        super().__init__()
-
-        self.path_root = path_root
-
-        self.solution = Solution(os.path.join(
-            path_root, "sparse", str(sol_nbr)))
-
-        self.solution.unit_rescale()
-
-        self.solution.rescale(size)
-
-    def generate_grid(self, H, W):
-
-        x = np.linspace(0, W-1, W)
-
-        y = np.linspace(0, H-1, H)
-
-        xv, yv = np.meshgrid(x, y)
-
-        return np.stack((xv, yv), axis=0)
-
-    def load_image(self, image: colmap_image):
-
-        img_path = os.path.join(self.path_root, "images", image.name)
-
-        with Image.open(img_path) as im:
+        with pil_image.open(img_path) as im:
 
             im = np.asarray(im).astype(np.float32)/255.0
 
         im = np.transpose(im, [2, 0, 1])
 
-        camera = self.solution.get_camera(image)
+        camera = self.get_camera(image)
 
         size = [camera.height, camera.width]
 
@@ -220,98 +193,57 @@ class ColmapSolution(SFMSolution):
 
         return im
 
-    def extract_images(self):
+    def get_sample(self, image):
 
-        images = []
+        im = self.load_image(image)
+        P = image_to_projection_matrix(image)
+        point3d = self.get_points(image)
+        camera = self.get_camera(image)
 
-        for _, image in self.solution.images.items():
+        intrinsics = None
 
-            im = self.load_image(image)
+        if camera.model == "SIMPLE_RADIAL":
+            f, cx, cy, k1 = camera.params
+            # assuming that k1 is small enough to be ignored!
+            intrinsics = np.array([f, f, cx, cy])
 
-            P = image_to_projection_matrix(image)
-            point3d = self.solution.get_points(image)
-            camera = self.solution.get_camera(image)
+        elif camera.model == "PINHOLE":
+            intrinsics = camera.params
+        else:
+            raise Exception("camera model not recognized")
 
-            point3d = P@point3d
+        return im, P, point3d, intrinsics
 
-            depth = np.linalg.norm(point3d[0:3], axis=0)
+    def __len__(self):
+        return len(self.img_keys)
 
-            tn = np.min(depth)/2
-            tf = np.max(depth)*2
+    def __getitem__(self, idx):
+        return self.get_sample(self.images[self.img_keys[idx]])
 
-            T = np.eye(4, 4)
-            T[0:3, 0:4] = P
+    def split(self, ratio=0.8, seed=42):
 
-            data = {"image": im, "T": T,
-                    "intrinsics": camera.params,
-                    "tn": tn, "tf": tf}
+        keys = self.img_keys
 
-            for key, val in data.items():
+        random.seed(seed)
+        random.shuffle(keys)
 
-                data[key] = val.astype(np.float32)
+        train_data = keys[:int((len(keys)+1)*ratio)]
+        test_data = keys[int((len(keys)+1)*ratio):]
 
-            images.append(data)
+        splits = {"train_split": train_data,
+                  "test_split": test_data}
 
-        return images
+        return SolutionSplit(self, train_data), SolutionSplit(self, test_data), splits
 
-    def calculate_rays(self):
 
-        total_rays = []
+class SolutionSplit():
 
-        total_tn = []
-        total_tf = []
-        total_color = []
+    def __init__(self, solution: ColmapSolution, keys) -> None:
+        self.solution = solution
+        self.keys = keys
 
-        for _, image in self.solution.images.items():
+    def __len__(self):
+        return len(self.keys)
 
-            im = self.load_image(image)
-
-            P = image_to_projection_matrix(image)
-            point3d = self.solution.get_points(image)
-            camera = self.solution.get_camera(image)
-
-            K = to_K_matrix(camera.params)
-
-            point3d = P@point3d
-
-            depth = np.linalg.norm(point3d[0:3], axis=0)
-
-            tn = np.min(depth)/2
-            tf = np.max(depth)*2
-
-            T = np.eye(4, 4)
-            T[0:3, 0:4] = P
-
-            Tinv = np.linalg.inv(T)
-            Kinv = np.linalg.inv(K)
-
-            M = Tinv[0:3, 0:3]@Kinv[0:3, 0:3]
-
-            H, W = im.shape[1:]
-            grid = self.generate_grid(H, W)
-            grid = np.concatenate((grid, np.ones_like(grid[0:1])), axis=0)
-
-            o = Tinv[0:3, 3]
-
-            d = M@grid.reshape(3, H*W)
-
-            d = d[0:3]/np.linalg.norm(d[0:3], axis=0)
-
-            o = np.repeat(o[:, None], H*W, axis=-1)
-
-            rays = np.concatenate((o, d), axis=0)
-
-            total_rays.append(rays.astype(np.float32))
-            total_tn.append(np.repeat(np.expand_dims(
-                np.array(tn), -1), H*W, axis=-1))
-            total_tf.append(np.repeat(np.expand_dims(
-                np.array(tf), -1), H*W, axis=-1))
-
-            total_color.append(im.reshape(3, H*W))
-
-        total_rays = np.concatenate(total_rays, axis=-1)
-        total_tn = np.expand_dims(np.concatenate(total_tn, axis=-1), 0)
-        total_tf = np.expand_dims(np.concatenate(total_tf, axis=-1), 0)
-        total_color = np.concatenate(total_color, axis=-1)
-
-        return np.concatenate((total_rays, total_tn, total_tf, total_color), axis=0).astype(np.float32)
+    def __getitem__(self, idx):
+        return self.solution.get_sample(self.solution.images[self.keys[idx]])

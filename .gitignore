@@ -166,3 +166,5 @@ config_server.yml
 
 lightning_logs
 *.dae
+
+mlruns

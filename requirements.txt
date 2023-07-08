@@ -7,3 +7,5 @@ PyMCubes
 trimesh
 pycollada
 matplotlib
+torchmetrics[image]
+mlflow
