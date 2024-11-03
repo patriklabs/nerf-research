@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+FROM pytorch/pytorch:2.5.0-cuda12.4-cudnn9-devel
 
 ARG USERNAME=vscode
 ARG USER_UID=1000

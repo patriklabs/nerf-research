@@ -8,40 +8,20 @@
             "name": "Python: nerf",
             "type": "python",
             "request": "launch",
-            "program": "nerf.py",
+            "program": "trainer.py",
             "console": "integratedTerminal",
             //"env": {"PYTORCH_JIT":"0"},
-            "args": [
-                "--accelerator=gpu",
-                "--devices=1",
-                "--homogeneous_projection=True",
-                "--batch=1024",
-                "--dataset_path=/database/nerf_dataset/fountain",
-                //"--model_path=/workspace/lightning_logs/version_55/checkpoints/epoch=119-step=84000.ckpt",
-                "--accumulate_grad_batches=2",
-                "--reg_weight=1.0",
-                "--lr=0.0001",
-                "--max_epochs=200"
-                //"--detect_anomaly=True"
-            ],
+            "args": [],
             "justMyCode": false
         },
         {
             "name": "Python: nerf viz",
             "type": "python",
             "request": "launch",
-            "program": "nerf.py",
+            "program": "visualize.py",
             "console": "integratedTerminal",
             "args": [
-                "--accelerator=gpu",
-                "--devices=1",
-                "--homogeneous_projection=True",
-                "--batch=1024",
-                "--dataset_path=/database/nerf_dataset/gate",
-                "--model_path=/workspace/lightning_logs/version_0/checkpoints/epoch=187-step=131600.ckpt",
-                "--accumulate_grad_batches=2",
-                "--visualize=True",
-                "--threshold=50"
+                "--ckpt=lightning_logs/version_4/checkpoints/epoch=43-step=17600.ckpt",
             ],
             "justMyCode": false
         },

@@ -1,29 +1,31 @@
-
 from typing import Any
-import pytorch_lightning as pl
+import lightning as pl
 import torch
 import torchvision
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 from torchmetrics.image import PeakSignalNoiseRatio, StructuralSimilarityIndexMeasure
 from nerf.util.util import to_rays, to_image
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 
 
 def make_grid(image, output_nbr):
-    """ makes a grid for tensorboard output"""
+    """makes a grid for tensorboard output"""
 
     return torchvision.utils.make_grid(image[0:output_nbr], padding=10, pad_value=1.0)
 
 
-def img2mse(x, y): return torch.square(x - y).mean()
+def img2mse(x, y):
+    return torch.square(x - y).mean()
 
 
-def mse2psnr(x): return -10.*torch.log(x)/torch.log(10.0*torch.ones_like(x))
+def mse2psnr(x):
+    return -10.0 * torch.log(x) / torch.log(10.0 * torch.ones_like(x))
 
 
 class LiNerf(pl.LightningModule):
-    def __init__(self, model, lr, reg_weight, **kwargs):
+    def __init__(self, model, lr=1e-4, reg_weight=1e-4, **kwargs):
         super().__init__()
 
         self.lr = lr
@@ -36,15 +38,6 @@ class LiNerf(pl.LightningModule):
 
         self.psnr = PeakSignalNoiseRatio(1)
         self.ssim = StructuralSimilarityIndexMeasure()
-
-    @staticmethod
-    def add_model_specific_args(parent_parser):
-        parser = parent_parser.add_argument_group("LiNerf")
-
-        parser.add_argument("--lr", type=float, default=1e-4)
-        parser.add_argument("--reg_weight", type=float, default=1e-3)
-
-        return parent_parser
 
     def validation_step(self, batch, batch_idx):
 
@@ -66,24 +59,29 @@ class LiNerf(pl.LightningModule):
             depth = to_image(depth, B, H, W)
 
             self.logger.experiment.add_image(
-                f"val/img_rendered", make_grid(color, 4), self.global_step + batch_idx)
+                f"val/img_rendered", make_grid(color, 4), self.global_step + batch_idx
+            )
 
-            depth_max = torch.max(depth.view(B, -1, H*W),
-                                  dim=-1, keepdim=True)[0].view(-1, 1, 1, 1)
-            depth_min = torch.min(depth.view(B, -1, H*W),
-                                  dim=-1, keepdim=True)[0].view(-1, 1, 1, 1)
+            depth_max = torch.max(depth.view(B, -1, H * W), dim=-1, keepdim=True)[
+                0
+            ].view(-1, 1, 1, 1)
+            depth_min = torch.min(depth.view(B, -1, H * W), dim=-1, keepdim=True)[
+                0
+            ].view(-1, 1, 1, 1)
 
-            depth = (depth-depth_min)/(depth_max-depth_min)
+            depth = (depth - depth_min) / (depth_max - depth_min)
 
             self.logger.experiment.add_image(
-                f"val/depth_rendered", make_grid(depth, 4), self.global_step + batch_idx)
+                f"val/depth_rendered", make_grid(depth, 4), self.global_step + batch_idx
+            )
 
             self.logger.experiment.add_image(
-                f"val/img_gt", make_grid(image, 4), self.global_step + batch_idx)
+                f"val/img_gt", make_grid(image, 4), self.global_step + batch_idx
+            )
 
             self.log("val/lpips", self.lpips(color.clamp(0, 1), image))
             self.log("val/psnr", self.psnr(color, image))
-            self.log("val/ssim",  self.ssim(color, image))
+            self.log("val/ssim", self.ssim(color, image))
 
     def forward(self, ray, tn, tf):
 
@@ -117,25 +115,25 @@ class LiNerf(pl.LightningModule):
 
         result = self.forward(batch["ray"], batch["tn"], batch["tf"])
 
-        loss = (color_gt-result["color_high_res"]).abs().mean()
+        loss = (color_gt - result["color_high_res"]).abs().mean()
 
         if "color_low_res" in result:
-            loss += (color_gt-result["color_low_res"]).abs().mean()
+            loss += (color_gt - result["color_low_res"]).abs().mean()
 
             loss /= 2.0
 
         if "reg_val" in result:
-            loss += self.reg_weight*result["reg_val"].mean()
+            loss += self.reg_weight * result["reg_val"].mean()
 
         if "plot" in result:
 
             self.logger.experiment.add_image(
-                f"train/plot", make_grid(result["plot"], 4), self.global_step)
+                f"train/plot", make_grid(result["plot"], 4), self.global_step
+            )
 
         self.log("train/loss", loss)
 
-        self.log("train/psnr",
-                 mse2psnr(img2mse(color_gt, result["color_high_res"])))
+        self.log("train/psnr", mse2psnr(img2mse(color_gt, result["color_high_res"])))
 
         return loss
 

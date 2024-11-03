@@ -168,3 +168,4 @@ lightning_logs
 *.dae
 
 mlruns
+model3d

@@ -1,4 +1,3 @@
-
 from distutils.util import strtobool
 
 import torch
@@ -25,7 +24,18 @@ def draw_categorical(pi, u):
 
 
 class Nerf(nn.Module):
-    def __init__(self, Lp, Ld, bins, homogeneous_projection, mixtures, hypo, low_res_bins, high_res_bins, **kwargs) -> None:
+    def __init__(
+        self,
+        Lp=10,
+        Ld=4,
+        bins=32,
+        homogeneous_projection=True,
+        mixtures=4,
+        hypo=True,
+        low_res_bins=32,
+        high_res_bins=32,
+        **kwargs
+    ) -> None:
         super().__init__()
 
         self.use_hypo = hypo
@@ -40,26 +50,6 @@ class Nerf(nn.Module):
             self.low_res_bins = low_res_bins
             self.high_res_bins = high_res_bins
 
-    @staticmethod
-    def add_model_specific_args(parent_parser):
-        parser = parent_parser.add_argument_group("Nerf")
-
-        parser.add_argument("--Lp", type=int, default=10)
-        parser.add_argument("--Ld", type=int, default=4)
-        parser.add_argument("--bins", type=int, default=32)
-        parser.add_argument("--mixtures", type=int, default=4)
-
-        parser.add_argument("--homogeneous_projection",
-                            type=strtobool, default=True)
-
-        parser.add_argument("--hypo",
-                            type=strtobool, default=True)
-
-        parser.add_argument("--low_res_bins", type=int, default=32)
-        parser.add_argument("--high_res_bins", type=int, default=32)
-
-        return parent_parser
-
     def forward(self, rays, tn, tf, step):
 
         if self.use_hypo:
@@ -70,14 +60,15 @@ class Nerf(nn.Module):
     def baseline(self, rays, tn, tf, step):
 
         tn = torch.zeros_like(tn)
-        tf = 3*torch.ones_like(tf)
+        tf = 3 * torch.ones_like(tf)
 
         t_low_res = uniform_sample(tn, tf, self.low_res_bins)
 
         # do one round to find out important sampling regions
 
         color_low_res, _, w_low_res, t_low_res = self.render_low_res.forward(
-            rays, t_low_res)
+            rays, t_low_res
+        )
 
         with torch.no_grad():
 
@@ -88,8 +79,11 @@ class Nerf(nn.Module):
 
         color_high_res, depth, w, t = self.render.forward(rays, t_resamp)
 
-        results = {"color_high_res": color_high_res,
-                   "depth": depth, "color_low_res": color_low_res}
+        results = {
+            "color_high_res": color_high_res,
+            "depth": depth,
+            "color_low_res": color_low_res,
+        }
 
         if step % 100 == 0 and self.training:
 
@@ -102,7 +96,7 @@ class Nerf(nn.Module):
     def iterative_resmp(self, rays, tn, tf, step):
 
         tn = torch.zeros_like(tn)
-        tf = 3*torch.ones_like(tf)
+        tf = 3 * torch.ones_like(tf)
 
         t = uniform_sample(tn, tf, 32)
 
@@ -112,7 +106,12 @@ class Nerf(nn.Module):
 
             with torch.no_grad():
 
-                _, _, w, _, = integrate_ray(t, sigma, color)
+                (
+                    _,
+                    _,
+                    w,
+                    _,
+                ) = integrate_ray(t, sigma, color)
 
                 t_resamp = resample(w, t, 16)
 
@@ -142,15 +141,15 @@ class Nerf(nn.Module):
     def hypo(self, rays, tn, tf, step):
 
         tn = torch.zeros_like(tn)
-        tf = 3*torch.ones_like(tf)
+        tf = 3 * torch.ones_like(tf)
 
         t = uniform_sample(tn, tf, self.bins)
 
         pi, mu, std = self.nerf_limit(rays)
 
-        t_g = mu + 2.0*std * \
-            torch.randn([*t.shape[0:-1], pi.shape[-1]],
-                        device=pi.device, dtype=pi.dtype)
+        t_g = mu + 2.0 * std * torch.randn(
+            [*t.shape[0:-1], pi.shape[-1]], device=pi.device, dtype=pi.dtype
+        )
 
         u = torch.rand_like(t)
 
@@ -164,8 +163,11 @@ class Nerf(nn.Module):
 
         div = kl_gauss(t.detach(), w.detach(), pi, mu, std)
 
-        results = {"color_high_res": color_high_res,
-                   "depth": depth, "reg_val": 1e-2*div}
+        results = {
+            "color_high_res": color_high_res,
+            "depth": depth,
+            "reg_val": 1e-2 * div,
+        }
 
         if step % 100 == 0 and self.training:
 
@@ -177,7 +179,7 @@ class Nerf(nn.Module):
 
     def plot(self, t, w, pi, mu, std, t_resamp=None):
 
-        q = pi*torch.exp(-0.5*((t-mu)/(std)) ** 2)/((std)*2.50662827463)
+        q = pi * torch.exp(-0.5 * ((t - mu) / (std)) ** 2) / ((std) * 2.50662827463)
         q = q.sum(-1, keepdim=True)
 
         q = q[-1].reshape(-1).detach().cpu().numpy()
@@ -201,7 +203,7 @@ class Nerf(nn.Module):
 
         fig, axs = plt.subplots(plots)
 
-        fig.suptitle('sampling')
+        fig.suptitle("sampling")
 
         if t_smp is not None:
             axs[count].hist(t_smp)
@@ -235,12 +237,16 @@ class Nerf(nn.Module):
         axs[count].set_title("q dist")
 
         buf = io.BytesIO()
-        plt.savefig(buf, format='png')
+        plt.savefig(buf, format="png")
         buf.seek(0)
 
         plt.close()
 
-        return torch.tensor(np.array(Image.open(buf))).permute(2, 0, 1).unsqueeze(0)[:, 0:3]
+        return (
+            torch.tensor(np.array(Image.open(buf)))
+            .permute(2, 0, 1)
+            .unsqueeze(0)[:, 0:3]
+        )
 
     def plot_resamp(self, t, w, t_smp, w_smp):
 
@@ -256,7 +262,7 @@ class Nerf(nn.Module):
 
         fig, axs = plt.subplots(plots)
 
-        fig.suptitle('sampling')
+        fig.suptitle("sampling")
 
         count = 0
         axs[count].hist(t)
@@ -290,9 +296,13 @@ class Nerf(nn.Module):
         count += 1
 
         buf = io.BytesIO()
-        plt.savefig(buf, format='png')
+        plt.savefig(buf, format="png")
         buf.seek(0)
 
         plt.close()
 
-        return torch.tensor(np.array(Image.open(buf))).permute(2, 0, 1).unsqueeze(0)[:, 0:3]
+        return (
+            torch.tensor(np.array(Image.open(buf)))
+            .permute(2, 0, 1)
+            .unsqueeze(0)[:, 0:3]
+        )
