@@ -1,4 +1,9 @@
 
+# Neural Radiance Field Research Repo
+A repository containing my research into current nerf methods
+
+# Installation Instructions
+
 clone and run 
 
     git submodule update --init --recursive
