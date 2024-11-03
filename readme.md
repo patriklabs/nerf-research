@@ -4,7 +4,7 @@ A repository containing my research into current nerf methods
 
 # Installation Instructions
 
-clone and run 
+Clone repo
 
     git submodule update --init --recursive
 
