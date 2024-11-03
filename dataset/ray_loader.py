@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from torch.utils.data import Dataset
 
@@ -14,16 +12,16 @@ def calculate_rays(solution):
     total_tf = []
     total_color = []
 
-    for (im, P, point3d, intrinsics) in solution:
+    for im, P, point3d, intrinsics in solution:
 
         K = to_K_matrix(intrinsics)
 
-        point3d = P@point3d
+        point3d = P @ point3d
 
-        depth = np.linalg.norm(point3d[0:3], axis=0)
+        distance = np.linalg.norm(point3d[0:3], axis=0)
 
-        tn = np.min(depth)/2
-        tf = np.max(depth)*2
+        tn = np.min(distance)
+        tf = np.max(distance)
 
         T = np.eye(4, 4)
         T[0:3, 0:4] = P
@@ -31,7 +29,7 @@ def calculate_rays(solution):
         Tinv = np.linalg.inv(T)
         Kinv = np.linalg.inv(K)
 
-        M = Tinv[0:3, 0:3]@Kinv[0:3, 0:3]
+        M = Tinv[0:3, 0:3] @ Kinv[0:3, 0:3]
 
         H, W = im.shape[1:]
         grid = generate_grid(H, W)
@@ -39,28 +37,28 @@ def calculate_rays(solution):
 
         o = Tinv[0:3, 3]
 
-        d = M@grid.reshape(3, H*W)
+        d = M @ grid.reshape(3, H * W)
 
-        d = d[0:3]/np.linalg.norm(d[0:3], axis=0)
+        d = d[0:3] / np.linalg.norm(d[0:3], axis=0)
 
-        o = np.repeat(o[:, None], H*W, axis=-1)
+        o = np.repeat(o[:, None], H * W, axis=-1)
 
         rays = np.concatenate((o, d), axis=0)
 
         total_rays.append(rays.astype(np.float32))
-        total_tn.append(np.repeat(np.expand_dims(
-            np.array(tn), -1), H*W, axis=-1))
-        total_tf.append(np.repeat(np.expand_dims(
-            np.array(tf), -1), H*W, axis=-1))
+        total_tn.append(np.repeat(np.expand_dims(np.array(tn), -1), H * W, axis=-1))
+        total_tf.append(np.repeat(np.expand_dims(np.array(tf), -1), H * W, axis=-1))
 
-        total_color.append(im.reshape(3, H*W))
+        total_color.append(im.reshape(3, H * W))
 
     total_rays = np.concatenate(total_rays, axis=-1)
     total_tn = np.expand_dims(np.concatenate(total_tn, axis=-1), 0)
     total_tf = np.expand_dims(np.concatenate(total_tf, axis=-1), 0)
     total_color = np.concatenate(total_color, axis=-1)
 
-    return np.concatenate((total_rays, total_tn, total_tf, total_color), axis=0).astype(np.float32)
+    return np.concatenate((total_rays, total_tn, total_tf, total_color), axis=0).astype(
+        np.float32
+    )
 
 
 class RayLoader(Dataset):
