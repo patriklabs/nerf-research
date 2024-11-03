@@ -58,18 +58,71 @@ def projection_matrix_to_image(P, image: Image):
     )
 
 
+def intrinsic_vec_to_matrix(intrinsics):
+
+    fx, fy, cx, cy = intrinsics
+
+    K = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
+
+    return K
+
+
 class ColmapSolution:
 
     def __init__(self, path, sol_nbr) -> None:
         self.root_path = path
         self.cameras, self.images, self.points = read_model(
-            os.path.join(path, "sparse", str(sol_nbr))
+            os.path.join(path, "sparse")
         )
 
         self.cameras = {
             key: self.convert_camera(camera) for key, camera in self.cameras.items()
         }
         self.img_keys = list(self.images.keys())
+
+        self.error = self.calculate_error()
+
+    def calculate_error(self):
+
+        avg_error = 0
+        terms = 0
+        for key, point in self.points.items():
+
+            for image_id in point.image_ids:
+                image = self.images[image_id]
+                camera = self.cameras[image.camera_id]
+
+                if camera.model == "PINHOLE":
+                    intrinsics = camera.params
+                else:
+                    raise Exception("camera model not recognized")
+
+                K = intrinsic_vec_to_matrix(intrinsics)
+                P = image_to_projection_matrix(self.images[image_id])
+
+                A = K @ P
+
+                X = to_homogen(point.xyz)
+
+                x = A @ X
+
+                x = x / x[2]
+
+                ids3d = image.point3D_ids
+
+                index = np.where(ids3d == key)[0]
+
+                for idx in index:
+                    x_ref = image.xys[idx.item()]
+
+                    error_term = np.linalg.norm(x[0:2] - x_ref)
+
+                    avg_error = avg_error * terms / (terms + 1) + error_term / (
+                        terms + 1
+                    )
+                    terms += 1
+
+        return avg_error
 
     def unit_transformations(self):
 
@@ -115,6 +168,8 @@ class ColmapSolution:
 
     def unit_rescale(self):
 
+        error_before = self.calculate_error()
+
         T, Tinv = self.unit_transformations()
 
         for key, image in self.images.items():
@@ -138,6 +193,10 @@ class ColmapSolution:
                 image_ids=point.image_ids,
                 point2D_idxs=point.point2D_idxs,
             )
+
+        error_after = self.calculate_error()
+
+        np.testing.assert_allclose(error_before, error_after, atol=1e-6)
 
     def rescale_image(self, size):
 

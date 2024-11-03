@@ -14,11 +14,11 @@ model:
         Ld: 4
         low_res_bins: 64
         high_res_bins: 128
-        homogeneous_projection: true
+        homogeneous_projection: false
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
-    dataset_path: "/database/nerf/v_data"
+    dataset_path: "/database/nerf/v_data/dense"
     split: true
     batch: 1024
     num_workers: 16
