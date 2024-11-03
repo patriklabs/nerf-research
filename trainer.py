@@ -19,9 +19,7 @@ def add_arguments():
 def main(config):
 
     Trainer(
-        trainer=config["trainer"],
-        model=config["model"],
-        datamodule=config["datamodule"],
+        **config,
     ).run()
 
 
