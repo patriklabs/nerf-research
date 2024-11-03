@@ -13,7 +13,7 @@ torch.set_float32_matmul_precision("high")
 def add_arguments():
     parser = argparse.ArgumentParser(description="nerf trainer")
 
-    parser.add_argument("--config", type=str, default="config/nerf_config.yaml")
+    parser.add_argument("--config", type=str)
     parser.add_argument("--ckpt", type=str)
 
     return parser.parse_args()

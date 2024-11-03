@@ -6,59 +6,24 @@
     "configurations": [
         {
             "name": "Python: nerf",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "trainer.py",
             "console": "integratedTerminal",
-            //"env": {"PYTORCH_JIT":"0"},
-            "args": [],
+            "args": [
+                "--config=config/nerf_config.yaml"
+            ],
             "justMyCode": false
         },
         {
             "name": "Python: nerf viz",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "visualize.py",
             "console": "integratedTerminal",
             "args": [
-                "--ckpt=lightning_logs/version_4/checkpoints/epoch=43-step=17600.ckpt",
-            ],
-            "justMyCode": false
-        },
-        {
-            "name": "Python: unisurf",
-            "type": "python",
-            "request": "launch",
-            "program": "unisurf.py",
-            "console": "integratedTerminal",
-            //"env": {"PYTORCH_JIT":"0"},
-            "args": [
-                "--accelerator=gpu",
-                "--devices=1",
-                "--homogeneous_projection=True",
-                "--batch=1024",
-                "--dataset_path=/database/nerf_dataset/gate",
-                "--model_path=/workspace/lightning_logs/version_24/checkpoints/epoch=13-step=22950.ckpt",
-                "--accumulate_grad_batches=2"
-            ],
-            "justMyCode": false
-        },
-        {
-            "name": "Python: unisurf viz",
-            "type": "python",
-            "request": "launch",
-            "program": "unisurf.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--accelerator=gpu",
-                "--devices=1",
-                "--homogeneous_projection=True",
-                "--batch=1024",
-                "--dataset_path=/database/nerf_dataset/gate",
-                "--model_path=/workspace/lightning_logs/version_24/checkpoints/epoch=13-step=22950.ckpt",
-                "--accumulate_grad_batches=2",
-                "--visualize=True",
-                "--threshold=0.5"
+                "--config=config/nerf_config.yaml",
+                "--ckpt=path/to/checkpoint.ckpt",
             ],
             "justMyCode": false
         },
