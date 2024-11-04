@@ -18,7 +18,7 @@ class NerfDensity(nn.Module):
             pos_dim += 1
 
         self.dnn1 = nn.Sequential(
-            nn.Linear(2*pos_dim*Lp + pos_dim, 256),
+            nn.Linear(2 * pos_dim * Lp + pos_dim, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
@@ -27,11 +27,11 @@ class NerfDensity(nn.Module):
             nn.Linear(256, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
-            nn.ReLU()
+            nn.ReLU(),
         )
 
         self.dnn2 = nn.Sequential(
-            nn.Linear(2*pos_dim*Lp + pos_dim+256, 256),
+            nn.Linear(2 * pos_dim * Lp + pos_dim + 256, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
@@ -40,14 +40,10 @@ class NerfDensity(nn.Module):
             nn.Linear(256, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
-            nn.ReLU()
+            nn.ReLU(),
         )
 
-        self.density = nn.Sequential(
-            nn.Linear(256, 1),
-            Noise(1e0),
-            nn.ReLU()
-        )
+        self.density = nn.Sequential(nn.Linear(256, 1), Noise(1e-2), nn.ReLU())
 
     def forward(self, x):
 

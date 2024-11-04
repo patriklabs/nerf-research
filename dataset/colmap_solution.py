@@ -67,6 +67,28 @@ def intrinsic_vec_to_matrix(intrinsics):
     return K
 
 
+def print_points(points):
+
+    import matplotlib.pyplot as plt
+
+    # Plotting the 3D point cloud
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    ax.scatter(
+        points[:, 0], points[:, 1], points[:, 2], s=1, c=points[:, 2], cmap="viridis"
+    )  # s=1 for small point size, color by Z-axis
+
+    # Set labels
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+
+    os.makedirs("tmp", exist_ok=True)
+    # Show the plot
+    plt.savefig("tmp/points.png")
+    plt.close()
+
+
 class ColmapSolution:
 
     def __init__(self, path, sol_nbr) -> None:
@@ -196,7 +218,15 @@ class ColmapSolution:
 
         error_after = self.calculate_error()
 
+        self.print()
+
         np.testing.assert_allclose(error_before, error_after, atol=1e-6)
+
+    def print(self):
+
+        xx = np.array([point.xyz for key, point in self.points.items()])
+
+        print_points(xx)
 
     def rescale_image(self, size):
 

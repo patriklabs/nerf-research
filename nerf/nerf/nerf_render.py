@@ -16,21 +16,21 @@ def integrate_ray(t: torch.Tensor, sigma, color, infinite: bool = False):
     # receive a high weight even if the last sigma is only slightly positive.
 
     if infinite:
-        dt = torch.cat((dt, 1e10*torch.ones_like(dt[..., 0:1, :])), dim=-2)
+        dt = torch.cat((dt, 1e10 * torch.ones_like(dt[..., 0:1, :])), dim=-2)
     else:
         dt = torch.cat((dt, torch.zeros_like(dt[..., 0:1, :])), dim=-2)
 
-    sdt = sigma*dt
+    sdt = sigma * dt
 
     Ti = torch.exp(-torch.cumsum(sdt, dim=-2))[..., 0:-1, :]
 
     Ti = torch.cat((torch.ones_like(Ti[..., 0:1, :]), Ti), dim=-2)
 
-    alpha = (1.0 - torch.exp(-sdt))
+    alpha = 1.0 - torch.exp(-sdt)
 
-    wi = Ti*alpha
+    wi = Ti * alpha
 
-    return (wi*color).sum(dim=-2), (wi*t).sum(dim=-2), wi, t
+    return (wi * color).sum(dim=-2), (wi * t).sum(dim=-2), wi, t
 
 
 class NerfRender(nn.Module):

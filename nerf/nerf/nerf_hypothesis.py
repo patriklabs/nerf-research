@@ -32,8 +32,8 @@ class Nerf(nn.Module):
         homogeneous_projection=True,
         mixtures=4,
         hypo=True,
-        low_res_bins=32,
-        high_res_bins=32,
+        low_res_bins=64,
+        high_res_bins=128,
         **kwargs
     ) -> None:
         super().__init__()

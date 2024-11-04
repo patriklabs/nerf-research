@@ -8,18 +8,17 @@ model:
   class_path: "train.li_nerf.LiNerf"
   init_args:
     model:
-      class_path: "nerf.nerf.nerf.Nerf"
+      class_path: "nerf.nerf.nerf_hypothesis.Nerf"
       init_args:
         Lp: 10
         Ld: 4
-        low_res_bins: 64
-        high_res_bins: 128
-        homogeneous_projection: false
+        bins: 32
+        hypo: false
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
     dataset_path: "/database/nerf/v_data/dense"
-    split: true
+    split: false
     batch: 1024
     num_workers: 16
     width: 320

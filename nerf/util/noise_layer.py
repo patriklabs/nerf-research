@@ -11,7 +11,9 @@ class Noise(nn.Module):
 
     def forward(self, x):
 
+        x = x + 1e-1
+
         if self.training:
-            x = x + self.std*torch.randn_like(x)
+            x = x + self.std * torch.randn_like(x)
 
         return x
