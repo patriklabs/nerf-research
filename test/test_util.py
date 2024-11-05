@@ -21,7 +21,7 @@ def test_alpha():
 
         y2 = alpha.test(x1, x2)
 
-        diff = (y1-y2).abs()
+        diff = (y1 - y2).abs()
 
         diff_max = diff.max()
 
@@ -41,7 +41,7 @@ def test_alpha2():
 
     y2 = alpha.test(x1, x2)
 
-    diff = (y1-y2).abs()
+    diff = (y1 - y2).abs()
 
     diff_max = diff.max()
 
@@ -73,10 +73,10 @@ def test_resample_new():
     mean = 12.0
     std = 2.0
 
-    x_min = mean - 4*std
-    x_max = mean + 4*std
+    x_min = mean - 4 * std
+    x_max = mean + 4 * std
 
-    w = torch.exp(-((t-mean)/std).pow(2))
+    w = torch.exp(-((t - mean) / std).pow(2))
 
     t_smp = resample_new(w, t, 1000)
 
@@ -89,7 +89,7 @@ def test_resample_new():
     t = t.reshape(-1).numpy()
 
     fig, axs = plt.subplots(3)
-    fig.suptitle('test')
+    fig.suptitle("test")
     axs[0].hist(t_smp)
     axs[0].set_xlim([x_min, x_max])
     axs[1].plot(t, w)
@@ -107,10 +107,10 @@ def test_resample():
     mean = 12.0
     std = 2.0
 
-    x_min = mean - 4*std
-    x_max = mean + 4*std
+    x_min = mean - 4 * std
+    x_max = mean + 4 * std
 
-    w = torch.exp(-((t-mean)/std).pow(2))
+    w = torch.exp(-((t - mean) / std).pow(2))
 
     t_smp = resample(w, t, 10000)
 
@@ -123,7 +123,7 @@ def test_resample():
     t = t.reshape(-1).numpy()
 
     fig, axs = plt.subplots(3)
-    fig.suptitle('test')
+    fig.suptitle("test")
     axs[0].hist(t_smp)
     axs[0].set_xlim([x_min, x_max])
     axs[1].plot(t, w)
@@ -142,11 +142,11 @@ def test_resample2():
     std = [0.1, 0.2, 0.1, 0.3]
     pi = [1, 3, 2, 0.5]
     pi_sum = sum(pi)
-    pi = [val/pi_sum for val in pi]
+    pi = [val / pi_sum for val in pi]
 
-    w = [torch.exp(-((t-mean)/std).pow(2)) for mean, std in zip(mean, std)]
+    w = [torch.exp(-((t - mean) / std).pow(2)) for mean, std in zip(mean, std)]
 
-    w = torch.stack([pi*w for pi, w in zip(pi, w)]).mean(0)
+    w = torch.stack([pi * w for pi, w in zip(pi, w)]).mean(0)
 
     t_smp = resample(w, t, 1024)
 
@@ -157,7 +157,7 @@ def test_resample2():
     t = t.reshape(-1).numpy()
 
     fig, axs = plt.subplots(3)
-    fig.suptitle('test')
+    fig.suptitle("test")
     axs[0].hist(t_smp)
     axs[0].set_xlim([0, 20])
     axs[1].plot(t, w)
@@ -176,10 +176,10 @@ def test_resample():
     mean = 12.0
     std = 2.0
 
-    x_min = mean - 4*std
-    x_max = mean + 4*std
+    x_min = mean - 4 * std
+    x_max = mean + 4 * std
 
-    w = torch.exp(-((t-mean)/std).pow(2))
+    w = torch.exp(-((t - mean) / std).pow(2))
 
     t_smp = resample(w, t, 10000)
 
@@ -192,7 +192,7 @@ def test_resample():
     t = t.reshape(-1).numpy()
 
     fig, axs = plt.subplots(3)
-    fig.suptitle('test')
+    fig.suptitle("test")
     axs[0].hist(t_smp)
     axs[0].set_xlim([x_min, x_max])
     axs[1].plot(t, w)
@@ -211,8 +211,7 @@ def test_uniform():
 
     t = uniform_sample(tn, tf, 64)
 
-    x = torch.tensor(list(range(64))).view(
-        1, 64, 1).expand(1024, 64, 1).float()
+    x = torch.tensor(list(range(64))).view(1, 64, 1).expand(1024, 64, 1).float()
 
     t = t.reshape(-1).numpy()
     x = x.reshape(-1).numpy()

@@ -13,7 +13,8 @@ model:
         Lp: 10
         Ld: 4
         bins: 32
-        hypo: false
+        homogeneous_projection: true
+        mixtures: 4
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
@@ -27,6 +28,6 @@ visualizer:
   samples: 256
   threshold: 50
   name: "output_mesh"
-  x_limit: [-1, 1]
-  y_limit: [-1, 1]
-  z_limit: [-1, 1]
+  x_limit: [-0.3, 0.3]
+  y_limit: [-0.3, 0.3]
+  z_limit: [-0.2, 0.4]

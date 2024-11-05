@@ -1,5 +1,3 @@
-
-
 from torch.utils.data import Dataset
 import numpy as np
 
@@ -8,19 +6,17 @@ def extract_image(sample):
 
     (im, P, point3d, intrinsics) = sample
 
-    point3d = P@point3d
+    point3d = P @ point3d
 
     depth = np.linalg.norm(point3d[0:3], axis=0)
 
-    tn = np.min(depth)/2
-    tf = np.max(depth)*2
+    tn = np.min(depth) / 2
+    tf = np.max(depth) * 2
 
     T = np.eye(4, 4)
     T[0:3, 0:4] = P
 
-    data = {"image": im, "T": T,
-            "intrinsics": intrinsics,
-            "tn": tn, "tf": tf}
+    data = {"image": im, "T": T, "intrinsics": intrinsics, "tn": tn, "tf": tf}
 
     for key, val in data.items():
 

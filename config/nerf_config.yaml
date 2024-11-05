@@ -14,7 +14,7 @@ model:
         Ld: 4
         low_res_bins: 64
         high_res_bins: 128
-        homogeneous_projection: false
+        homogeneous_projection: true
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:

@@ -16,7 +16,7 @@ class NerfLimit(nn.Module):
 
         self.embedding_p = Embedding(Lp, homogeneous_projection)
 
-        Ld = Lp//2
+        Ld = Lp // 2
 
         self.embedding_d = Embedding(Ld)
 
@@ -24,7 +24,7 @@ class NerfLimit(nn.Module):
             pos_dim += 1
 
         self.dnn1 = nn.Sequential(
-            nn.Linear(2*pos_dim*Lp + pos_dim + 2*3*Ld + 3, 256),
+            nn.Linear(2 * pos_dim * Lp + pos_dim + 2 * 3 * Ld + 3, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
@@ -33,15 +33,13 @@ class NerfLimit(nn.Module):
             nn.Linear(256, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
-            nn.ReLU()
+            nn.ReLU(),
         )
 
-        self.limit = nn.Sequential(
-            nn.Linear(256, 3*k)
-        )
+        self.limit = nn.Sequential(nn.Linear(256, 3 * k))
 
         self.softmax = nn.Softmax(-1)
-        self.softplus = nn.Softplus()
+        self.softplus = nn.Softplus(1)
 
     def forward(self, ray):
 

@@ -43,7 +43,7 @@ class NerfDensity(nn.Module):
             nn.ReLU(),
         )
 
-        self.density = nn.Sequential(nn.Linear(256, 1), Noise(1e-2), nn.ReLU())
+        self.density = nn.Sequential(nn.Linear(256, 1), Noise(1e-1), nn.ReLU())
 
     def forward(self, x):
 

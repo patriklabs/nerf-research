@@ -1,10 +1,11 @@
 import numpy as np
 
+
 def generate_grid(H, W):
 
-    x = np.linspace(0, W-1, W)
+    x = np.linspace(0, W - 1, W)
 
-    y = np.linspace(0, H-1, H)
+    y = np.linspace(0, H - 1, H)
 
     xv, yv = np.meshgrid(x, y)
 
@@ -36,7 +37,7 @@ def iqr(x):
 
     iqr = q3 - q1
 
-    L = q1-1.5*iqr
-    U = q3+1.5*iqr
+    L = q1 - 1.5 * iqr
+    U = q3 + 1.5 * iqr
 
     return L, U

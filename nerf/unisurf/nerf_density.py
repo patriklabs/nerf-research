@@ -4,6 +4,7 @@ from torch.nn.utils import weight_norm
 
 from nerf.util.embedding import Embedding
 
+
 class NerfDensity(nn.Module):
 
     def __init__(self, Lp, homogeneous_projection=False) -> None:
@@ -17,7 +18,7 @@ class NerfDensity(nn.Module):
             pos_dim += 1
 
         self.dnn1 = nn.Sequential(
-            weight_norm(nn.Linear(2*pos_dim*Lp+pos_dim, 256)),
+            weight_norm(nn.Linear(2 * pos_dim * Lp + pos_dim, 256)),
             nn.Softplus(beta=100),
             weight_norm(nn.Linear(256, 256)),
             nn.Softplus(beta=100),
@@ -26,11 +27,11 @@ class NerfDensity(nn.Module):
             weight_norm(nn.Linear(256, 256)),
             nn.Softplus(beta=100),
             weight_norm(nn.Linear(256, 256)),
-            nn.Softplus(beta=100)
+            nn.Softplus(beta=100),
         )
 
         self.dnn2 = nn.Sequential(
-            weight_norm(nn.Linear(2*pos_dim*Lp+256+pos_dim, 256)),
+            weight_norm(nn.Linear(2 * pos_dim * Lp + 256 + pos_dim, 256)),
             nn.Softplus(beta=100),
             weight_norm(nn.Linear(256, 256)),
             nn.Softplus(beta=100),
@@ -39,12 +40,10 @@ class NerfDensity(nn.Module):
             weight_norm(nn.Linear(256, 256)),
             nn.Softplus(beta=100),
             weight_norm(nn.Linear(256, 256)),
-            nn.Softplus(beta=100)
+            nn.Softplus(beta=100),
         )
 
-        self.density = nn.Sequential(
-            weight_norm(nn.Linear(256, 1))
-        )
+        self.density = nn.Sequential(weight_norm(nn.Linear(256, 1)))
 
     def forward(self, x):
 

@@ -20,8 +20,8 @@ def calculate_rays(solution):
 
         distance = np.linalg.norm(point3d[0:3], axis=0)
 
-        tn = np.min(distance) / 2
-        tf = np.max(distance) * 2
+        tn = np.min(distance)
+        tf = np.max(distance)
 
         T = np.eye(4, 4)
         T[0:3, 0:4] = P

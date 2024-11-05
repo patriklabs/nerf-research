@@ -1,4 +1,3 @@
-
 from torch import nn
 from distutils.util import strtobool
 from nerf.unisurf.nerf_render import NerfRender
@@ -9,7 +8,21 @@ import math
 
 
 class Nerf(nn.Module):
-    def __init__(self, Lp, Ld, marching_bins, bins, intersection_itr, tau, noise, delta_max, delta_min, beta, homogeneous_projection, **kwargs) -> None:
+    def __init__(
+        self,
+        Lp,
+        Ld,
+        marching_bins,
+        bins,
+        intersection_itr,
+        tau,
+        noise,
+        delta_max,
+        delta_min,
+        beta,
+        homogeneous_projection,
+        **kwargs
+    ) -> None:
         super().__init__()
 
         self.marching_bins = marching_bins
@@ -40,8 +53,7 @@ class Nerf(nn.Module):
         parser.add_argument("--delta_min", type=float, default=0.05)
         parser.add_argument("--beta", type=float, default=1e-4)
 
-        parser.add_argument("--homogeneous_projection",
-                            type=strtobool, default=True)
+        parser.add_argument("--homogeneous_projection", type=strtobool, default=True)
 
         return parent_parser
 
@@ -49,26 +61,32 @@ class Nerf(nn.Module):
 
         with torch.no_grad():
 
-            ts, mask_ts = find_intersection(ray, tn, tf, self.render,
-                                            self.tau, self.marching_bins,
-                                            self.intersection_itr)
+            ts, mask_ts = find_intersection(
+                ray,
+                tn,
+                tf,
+                self.render,
+                self.tau,
+                self.marching_bins,
+                self.intersection_itr,
+            )
 
         if self.training:
 
             tu = uniform_sample(tn, tf, self.bins)
 
-            delta = max(self.delta_max * math.exp(-step*self.beta),
-                        self.delta_min)
+            delta = max(self.delta_max * math.exp(-step * self.beta), self.delta_min)
 
-            delta = (tf-tn)*delta
+            delta = (tf - tn) * delta
 
-            tc = uniform_sample(ts.squeeze(-1)-delta,
-                                ts.squeeze(-1)+delta, self.bins)
+            tc = uniform_sample(
+                ts.squeeze(-1) - delta, ts.squeeze(-1) + delta, self.bins
+            )
 
             mask = mask_ts.logical_and(tc >= 0)
             t_smp = where(mask, tc, tu)
 
-            tu = uniform_sample(tn, ts.squeeze(-1), self.bins//2)
+            tu = uniform_sample(tn, ts.squeeze(-1), self.bins // 2)
 
             t = torch.cat((tu, t_smp), dim=-2)
 
@@ -76,14 +94,13 @@ class Nerf(nn.Module):
 
         else:
 
-            color_high_res, depth, _, _ = self.render.forward(
-                ray, ts, volumetric=False)
+            color_high_res, depth, _, _ = self.render.forward(ray, ts, volumetric=False)
 
         x_s = ray_to_points(ray, ts)[0]
 
         n1 = self.render.evaluate_normal(x_s)
-        n2 = self.render.evaluate_normal(x_s+self.noise*torch.randn_like(x_s))
+        n2 = self.render.evaluate_normal(x_s + self.noise * torch.randn_like(x_s))
 
-        reg_val = (n1-n2).square().sum(-1)
+        reg_val = (n1 - n2).square().sum(-1)
 
         return {"color_high_res": color_high_res, "depth": depth, "reg_val": reg_val}

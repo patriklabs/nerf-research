@@ -19,11 +19,17 @@ class Embedding(nn.Module):
 
             x = torch.cat((x, torch.ones_like(x[..., 0:1])), dim=-1)
 
-            x = x/torch.linalg.norm(x, dim=-1, keepdim=True)
+            x = x / torch.linalg.norm(x, dim=-1, keepdim=True)
 
-        x_e = torch.cat([torch.cat([torch.sin((2**i) * math.pi*x),
-                                    torch.cos((2**i) * math.pi*x)],
-                                   dim=-1)
-                         for i in range(self.L)], dim=-1)
+        x_e = torch.cat(
+            [
+                torch.cat(
+                    [torch.sin((2**i) * math.pi * x), torch.cos((2**i) * math.pi * x)],
+                    dim=-1,
+                )
+                for i in range(self.L)
+            ],
+            dim=-1,
+        )
 
         return torch.cat((x, x_e), dim=-1)
