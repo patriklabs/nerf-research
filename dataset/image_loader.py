@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset
 import numpy as np
+from util.statistics import reject_outliers
 
 
 def extract_image(sample):
@@ -8,10 +9,12 @@ def extract_image(sample):
 
     point3d = P @ point3d
 
-    depth = np.linalg.norm(point3d[0:3], axis=0)
+    distance = np.linalg.norm(point3d[0:3], axis=0)
 
-    tn = np.min(depth) / 2
-    tf = np.max(depth) * 2
+    distance = reject_outliers(distance)
+
+    tn = np.min(distance) / 1.5
+    tf = np.max(distance) * 1.5
 
     T = np.eye(4, 4)
     T[0:3, 0:4] = P

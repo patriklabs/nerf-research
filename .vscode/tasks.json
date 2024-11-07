@@ -40,7 +40,7 @@
                 "panel": "shared"
             },
             "args": [
-                "nerf.py",
+                "visualize.py",
                 "--config=config/nerf_config.yaml",
                 "--ckpt=path/to/checkpoint.ckpt",
             ]

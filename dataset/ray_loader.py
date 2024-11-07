@@ -2,6 +2,7 @@ import numpy as np
 from torch.utils.data import Dataset
 
 from dataset.util import to_K_matrix, generate_grid
+from util.statistics import reject_outliers
 
 
 def calculate_rays(solution):
@@ -20,8 +21,10 @@ def calculate_rays(solution):
 
         distance = np.linalg.norm(point3d[0:3], axis=0)
 
-        tn = np.min(distance)
-        tf = np.max(distance)
+        distance = reject_outliers(distance)
+
+        tn = np.min(distance) / 1.5
+        tf = np.max(distance) * 1.5
 
         T = np.eye(4, 4)
         T[0:3, 0:4] = P

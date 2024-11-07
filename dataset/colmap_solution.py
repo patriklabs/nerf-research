@@ -14,6 +14,8 @@ from thirdparty.colmap.scripts.python.read_write_model import (
     read_model,
     rotmat2qvec,
 )
+from util.ply import write_ply
+from util.statistics import reject_outliers
 
 
 def image_to_projection_matrix(image: Image):
@@ -67,26 +69,44 @@ def intrinsic_vec_to_matrix(intrinsics):
     return K
 
 
-def print_points(points):
+import numpy as np
 
-    import matplotlib.pyplot as plt
 
-    # Plotting the 3D point cloud
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
-    ax.scatter(
-        points[:, 0], points[:, 1], points[:, 2], s=1, c=points[:, 2], cmap="viridis"
-    )  # s=1 for small point size, color by Z-axis
+def sphere_point_cloud(radius=1, num_points=1000):
+    """
+    Generate a point cloud on the surface of a sphere.
 
-    # Set labels
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
+    Parameters:
+    - radius: Radius of the sphere (default is 1).
+    - num_points: Number of points to generate (default is 1000).
 
-    os.makedirs("tmp", exist_ok=True)
-    # Show the plot
-    plt.savefig("tmp/points.png")
-    plt.close()
+    Returns:
+    - A NumPy array of shape (num_points, 3) representing the 3D coordinates of points on the sphere.
+    """
+    # Generate random angles for spherical coordinates
+    phi = np.random.uniform(0, np.pi, num_points)  # Angle from the z-axis (0 to pi)
+    theta = np.random.uniform(
+        0, 2 * np.pi, num_points
+    )  # Angle from the x-axis (0 to 2*pi)
+
+    # Convert spherical coordinates to Cartesian coordinates
+    x = radius * np.sin(phi) * np.cos(theta)
+    y = radius * np.sin(phi) * np.sin(theta)
+    z = radius * np.cos(phi)
+
+    # Combine x, y, z coordinates into a (num_points, 3) array
+    points = np.vstack((x, y, z)).T
+
+    return points
+
+
+def print_points(points, path):
+
+    sphere = sphere_point_cloud(1, 1000)
+
+    points = np.concatenate([points, sphere], axis=0)
+
+    write_ply(points, np.zeros_like(points), path)
 
 
 class ColmapSolution:
@@ -160,8 +180,11 @@ class ColmapSolution:
 
         x_cen = x - x_mean
 
-        # s = np.max(np.abs(x_cen), keepdims=True)
-        s = np.max(np.linalg.norm(x_cen[0:3], axis=0), keepdims=True)
+        dists = np.linalg.norm(x_cen[0:3], axis=0)
+
+        dists = reject_outliers(dists)
+
+        s = np.max(dists, keepdims=True)
 
         # s = iqr(np.abs(x_cen).reshape(-1))[1]
 
@@ -226,7 +249,7 @@ class ColmapSolution:
 
         xx = np.array([point.xyz for key, point in self.points.items()])
 
-        print_points(xx)
+        print_points(xx, os.path.join(self.root_path, "points.ply"))
 
     def rescale_image(self, size):
 

@@ -18,7 +18,7 @@ model:
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
-    dataset_path: "/database/nerf/v_data/dense"
+    dataset_path: "/database/nerf/rome_fountain/dense"
     split: true
     batch: 1024
     num_workers: 16
@@ -26,7 +26,7 @@ datamodule:
     height: 320
 visualizer:
   samples: 256
-  threshold: 50
+  threshold: 10
   name: "output_mesh"
   x_limit: [-1, 1]
   y_limit: [-1, 1]
