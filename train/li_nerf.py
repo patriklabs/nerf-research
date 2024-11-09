@@ -125,6 +125,9 @@ class LiNerf(pl.LightningModule):
         if "reg_val" in result:
             loss += self.reg_weight * result["reg_val"].mean()
 
+        if "eikonal_loss" in result:
+            loss += 1e-2 * result["eikonal_loss"].mean()
+
         if "plot" in result:
 
             self.logger.experiment.add_image(

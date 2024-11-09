@@ -1,7 +1,9 @@
+from typing import List
+
 import torch
 
 
-def ray_to_points(ray, t):
+def ray_to_points(ray, t) -> List[torch.Tensor]:
 
     o, d = torch.split(ray.unsqueeze(-2), [3, 3], dim=-1)
 

@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 from nerf.nerf import NerfColor, NerfDensity
-from nerf.util.util import ray_to_points, where
+from nerf.util.util import ray_to_points
 
 
 def integrate_ray(t: torch.Tensor, sigma, color, infinite: bool = False):
