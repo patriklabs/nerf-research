@@ -1,38 +1,86 @@
-
-# Neural Radiance Field Research Repo
-A repository containing my research into current nerf methods
+# Neural Radiance Field Research Repository
+This repository contains research and tools for working with Neural Radiance Fields (NeRF) using current methods.
 
 ## Setup
-Clone repo
+1. **Clone the repository** (including submodules):
 
-    git submodule update --init --recursive
+   ```bash
+   git clone --recurse-submodules <repo-url>
+   ```
 
-## Generate initial sparse reconstruction
+2. **Initialize and update submodules**:
 
-Build colmap image
+   ```bash
+   git submodule update --init --recursive
+   ```
 
-    /colmap/build_docker.sh
+## Generate Initial Sparse Reconstruction
 
-Create a sparse reconstriction of a set of images
+1. **Build the COLMAP Docker image**:
 
-    /colmap/docker_run.sh /path/to/data
+   ```bash
+   ./colmap/build_docker.sh
+   ```
 
-## Run using docker
+2. **Create a sparse reconstruction of a dataset**:
+   
+   Run COLMAP on your data to generate a sparse reconstruction by specifying the path to your dataset:
 
-Update add or update a config file in the config folder. Run `./docker/build.sh` to create the docker image and then run `./docker/run.sh <path/to dataset> <path/to/config.yaml>` to start a training session or  `./docker/run.sh <path/to dataset> <path/to/config.yaml> <path/to/ckpt> --visualize` to export
-a mesh from the nerf.
+   ```bash
+   ./colmap/docker_run.sh /path/to/data
+   ```
 
-E.g.
+## Running NeRF with Docker
 
-`
-./docker/run.sh /database config/nerf_config.yaml
-`
+1. **Prepare Configuration**:
+   
+   - Add or update a configuration file in the `config` folder to specify your training parameters.
 
-## Run using vscode
-Download vscode and install Dev containers
+2. **Build and Run the Docker Image**:
+   
+   - **Build the Docker image**:
 
-Update devcontainer.json to map the folder containing database to the /database folder inside the container
+     ```bash
+     ./docker/build.sh
+     ```
 
-    -v=/path/to/database/:/database:rw
+   - **Start a training session**:
 
-Update add or update a config file in the config folder and then launch the nerf task for training and the nerf vis task for a 3d mesh export
+     ```bash
+     ./docker/run.sh /path/to/dataset /path/to/config.yaml
+     ```
+
+   - **Optional**: To export a 3D mesh, specify a checkpoint file and add the `--visualize` flag:
+
+     ```bash
+     ./docker/run.sh /path/to/dataset /path/to/config.yaml /path/to/ckpt --visualize
+     ```
+
+   **Example**:
+
+   ```bash
+   ./docker/run.sh /database config/nerf_config.yaml
+   ```
+
+## Running NeRF with Visual Studio Code (VSCode)
+
+1. **Set Up VSCode and Dev Containers**:
+   
+   - Download and install [VSCode](https://code.visualstudio.com/) if not already installed.
+   - Install the Dev Containers extension in VSCode.
+
+2. **Configure DevContainer**:
+   
+   - Update `devcontainer.json` to map your local data directory to the `/database` folder inside the container:
+
+     ```json
+     "runArgs": [
+		"-v=/path/to/database:/database:rw",
+     
+     ```
+
+3. **Run Training and Visualization Tasks**:
+   
+   - Update or add a configuration file in the `config` folder.
+   - Launch the **NeRF Training** task to start training.
+   - To export a 3D mesh, use the **NeRF Visualization** task.
