@@ -14,7 +14,7 @@ model:
         Ld: 4
         low_res_bins: 64
         high_res_bins: 128
-        homogeneous_projection: false
+        homogeneous_projection: true
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
@@ -26,7 +26,7 @@ datamodule:
     height: 320
 visualizer:
   samples: 256
-  threshold: -0.05
+  threshold: 0
   name: "output_mesh"
   x_limit: [-1, 1]
   y_limit: [-1, 1]

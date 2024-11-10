@@ -25,10 +25,13 @@ class Nerf(nn.Module):
         self.render = NerfRender(Lp, Ld, homogeneous_projection)
         self.low_res_bins = low_res_bins
         self.high_res_bins = high_res_bins
-        self.s_inv_learned_log = nn.Parameter(torch.tensor(-3.0))
-        self.register_buffer("s_inv_fixed_log", torch.tensor(-3.0))
+        self.s_inv_learned_log = nn.Parameter(torch.tensor(-4.0))
+        self.register_buffer("s_inv_fixed_log", torch.tensor(-4.0))
 
     def forward(self, rays, tn, tf, step):
+
+        # tn = torch.zeros_like(tn)
+        # tf = 3 * torch.ones_like(tf)
 
         with torch.no_grad():
 
