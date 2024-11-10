@@ -7,11 +7,12 @@ Clone repo
 
     git submodule update --init --recursive
 
+## Generate initial sparse reconstruction
+
 Build colmap image
 
     /colmap/build_docker.sh
 
-## Sparse reconstruction
 Create a sparse reconstriction of a set of images
 
     /colmap/docker_run.sh /path/to/data
