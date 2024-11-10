@@ -31,3 +31,4 @@ RUN pip install -r requirements.txt && rm -rf /var/lib/apt/lists/*
 
 ENV TORCH_HOME=/workspace/.cache/torch
 ENV DEBIAN_FRONTEND=dialog
+ENTRYPOINT ["docker/entrypoint.sh"]

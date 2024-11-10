@@ -2,9 +2,6 @@
 # Neural Radiance Field Research Repo
 A repository containing my research into current nerf methods
 
-# Installation Instructions
-The installation and usage are described in this section 
-
 ## Setup
 Clone repo
 
@@ -19,9 +16,18 @@ Create a sparse reconstriction of a set of images
 
     /colmap/docker_run.sh /path/to/data
 
-where the images are in a subfolder in data called images
+## Run using docker
 
-## Run and visualize nerf
+Run `./docker/build.sh` to create the nerf image and then run `./docker/run.sh <path/to dataset> <path/to/config.yaml>` to start a training session or  `./docker/run.sh <path/to dataset> <path/to/config.yaml> <path/to/ckpt> --visualize` to export
+a mesh from the nerf.
+
+E.g.
+
+`
+./docker/run.sh /database config/nerf_config.yaml
+`
+
+## Run using vscode
 Download vscode and install Dev containers
 
 Update devcontainer.json to map the folder containing database to the /database folder inside the container
