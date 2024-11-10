@@ -36,8 +36,8 @@ class Nerf(nn.Module):
         t_low_res = uniform_sample(tn, tf, self.low_res_bins)
 
         # do one round to find out important sampling regions
-        (color_low_res, _, w_low_res, t_low_res), eikonal_loss_low_res = (
-            self.render.forward(rays, t_low_res, self.s_inv_fixed_log)
+        (_, _, w_low_res, t_low_res), eikonal_loss_low_res = self.render.forward(
+            rays, t_low_res, self.s_inv_fixed_log
         )
 
         with torch.no_grad():
@@ -53,7 +53,6 @@ class Nerf(nn.Module):
         results = {
             "color_high_res": color_high_res,
             "depth": depth,
-            "color_low_res": color_low_res,
             "eikonal_loss": (eikonal_loss_low_res + eikonal_loss_high_res) / 2.0,
         }
 
