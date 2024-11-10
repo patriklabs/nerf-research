@@ -15,7 +15,6 @@
             "args": [
                 "main.py",
                 "--config=config/neus_config.yaml",
-                "--ckpt=path/to/checkpoint.ckpt",
             ]
         },
         {
