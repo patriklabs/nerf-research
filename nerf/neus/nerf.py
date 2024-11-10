@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 from torch import nn
 
-from nerf.nerf.nerf_render import NerfRender
+from nerf.neus.nerf_render import NerfRender
 from nerf.util.util import (
     resample,
     uniform_sample,
@@ -14,8 +14,8 @@ from nerf.util.util import (
 )
 
 """
-Adaptation of NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis
-arxiv: https://arxiv.org/abs/2003.08934
+Adaptation of Neus: Learning Neural Implicit Surfaces by Volume Rendering for Multi-view Reconstruction
+arxiv: https://arxiv.org/abs/2106.10689
 """
 
 
@@ -32,10 +32,10 @@ class Nerf(nn.Module):
         super().__init__()
 
         self.render = NerfRender(Lp, Ld, homogeneous_projection)
-
-        self.render_low_res = NerfRender(Lp, Ld, homogeneous_projection)
         self.low_res_bins = low_res_bins
         self.high_res_bins = high_res_bins
+        self.s_inv_learned_log = nn.Parameter(torch.tensor(-4.0))
+        self.register_buffer("s_inv_fixed_log", torch.tensor(-4.0))
 
     def forward(self, rays, tn, tf, step):
 
@@ -45,25 +45,29 @@ class Nerf(nn.Module):
         o, d = torch.split(rays, [3, 3], dim=-1)
         tn, tf = ray_sphere_intersection_distances_batch(o, d, 0, 3)
 
-        t_low_res = uniform_sample(tn, tf, self.low_res_bins)
-
-        # do one round to find out important sampling regions
-        color_low_res, _, w_low_res, t_low_res = self.render_low_res.forward(
-            rays, t_low_res
-        )
-
         with torch.no_grad():
+
+            t_low_res = uniform_sample(tn, tf, self.low_res_bins)
+
+            # do one round to find out important sampling regions
+            (_, _, w_low_res, t_low_res), _ = self.render.forward(
+                rays, t_low_res, self.s_inv_learned_log + 0.5, False
+            )
+
             # sample according to w
             t_resamp = resample(w_low_res, t_low_res, self.high_res_bins)
 
         t_resamp = torch.cat((t_low_res, t_resamp), dim=1)
 
-        color_high_res, depth, w, t = self.render.forward(rays, t_resamp)
+        (color_high_res, depth, w, t), eikonal_loss = self.render.forward(
+            rays, t_resamp, self.s_inv_learned_log
+        )
 
         results = {
             "color_high_res": color_high_res,
             "depth": depth,
-            "color_low_res": color_low_res,
+            "eikonal_loss": eikonal_loss,
+            "s": torch.exp(-self.s_inv_learned_log),
         }
 
         if step % 100 == 0 and self.training:

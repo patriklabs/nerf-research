@@ -2,6 +2,18 @@ import numpy as np
 
 
 def write_ply(points, color, path):
+    """
+    Convert point cloud to a PLY file.
+
+    Args:
+        points (np.ndarray): Points.
+        color (np.ndarray): Color.
+        path (str): Path.
+
+    Returns:
+        None
+    """
+
     header = "ply\nformat ascii 1.0"
     header += "\nelement vertex %d" % len(points)
     header += "\nproperty float32 x\nproperty float32 y\nproperty float32 z"

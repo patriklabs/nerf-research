@@ -20,6 +20,7 @@ class NerfVisualizer:
     ) -> None:
         self.device = device
         self.nerf_render = nerf_render.to(device)
+        self.nerf_render.eval()
         self.limits = [
             x_limit[0],
             x_limit[1],
@@ -42,7 +43,7 @@ class NerfVisualizer:
             y = np.linspace(y_min, y_max, self.nbr_samples)
             z = np.linspace(z_min, z_max, self.nbr_samples)
 
-            points = np.stack(np.meshgrid(x, y, z), -1)
+            points = np.stack(np.meshgrid(x, y, z, indexing="ij"), -1)
 
             points = torch.tensor(points, device=self.device, dtype=torch.float32)
 
@@ -56,7 +57,7 @@ class NerfVisualizer:
 
             print("fraction occupied", np.mean(sigma > self.threshold))
 
-            vertices, triangles = mcubes.marching_cubes(sigma, self.threshold)
+            vertices, triangles = mcubes.marching_cubes(-sigma, self.threshold)
 
             scale = np.array([x_max - x_min, y_max - y_min, z_max - z_min]) / (
                 self.nbr_samples - 1

@@ -9,7 +9,7 @@
 				"ms-python.black-formatter",
 				"redhat.vscode-yaml",
 				"ms-toolsai.tensorboard",
-				"ms-python.isort",
+				"ms-python.isort"
 			],
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "bash"
@@ -20,8 +20,6 @@
 	"runArgs": [
 		"-v=/database:/database:rw",
 		"--gpus=all",
-		"--net=host",
-		"--ipc=host",
 		"--rm"
 	],
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",

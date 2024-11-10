@@ -11,16 +11,46 @@ matplotlib.use("Agg")
 
 
 def make_grid(image, output_nbr):
-    """makes a grid for tensorboard output"""
+    """
+    makes a grid for tensorboard output
+
+    Args:
+        image (torch.Tensor): Image.
+        output_nbr (int): Output number.
+
+    Returns:
+        torch.Tensor: Image grid
+    """
 
     return torchvision.utils.make_grid(image[0:output_nbr], padding=10, pad_value=1.0)
 
 
 def img2mse(x, y):
+    """
+    calculates the mean squared error between two images
+
+    Args:
+        x (torch.Tensor): Image.
+        y (torch.Tensor): Image.
+
+    Returns:
+        torch.Tensor: Mean squared error
+    """
+
     return torch.square(x - y).mean()
 
 
 def mse2psnr(x):
+    """
+    calculates the peak signal to noise ratio from the mean squared error
+
+    Args:
+        x (torch.Tensor): Mean squared error.
+
+    Returns:
+        torch.Tensor: Peak signal to noise ratio
+    """
+
     return -10.0 * torch.log(x) / torch.log(10.0 * torch.ones_like(x))
 
 
@@ -125,11 +155,17 @@ class LiNerf(pl.LightningModule):
         if "reg_val" in result:
             loss += self.reg_weight * result["reg_val"].mean()
 
+        if "eikonal_loss" in result:
+            loss += 1e-2 * result["eikonal_loss"].mean()
+
         if "plot" in result:
 
             self.logger.experiment.add_image(
                 f"train/plot", make_grid(result["plot"], 4), self.global_step
             )
+
+        if "s" in result:
+            self.log("train/s", result["s"])
 
         self.log("train/loss", loss)
 

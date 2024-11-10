@@ -13,8 +13,8 @@
                 "panel": "shared"
             },
             "args": [
-                "trainer.py",
-                "--config=config/nerf_config.yaml"
+                "main.py",
+                "--config=config/neus_config.yaml",
             ]
         },
         {
@@ -40,9 +40,10 @@
                 "panel": "shared"
             },
             "args": [
-                "visualize.py",
-                "--config=config/nerf_config.yaml",
+                "main.py",
+                "--config=config/neus_config.yaml",
                 "--ckpt=path/to/checkpoint.ckpt",
+                "--visualize"
             ]
         },
     ]
