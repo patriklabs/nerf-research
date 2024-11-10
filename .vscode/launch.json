@@ -8,10 +8,10 @@
             "name": "Python: nerf",
             "type": "debugpy",
             "request": "launch",
-            "program": "trainer.py",
+            "program": "main.py",
             "console": "integratedTerminal",
             "args": [
-                "--config=config/nerf_config.yaml"
+                "--config=config/neus_config.yaml",
             ],
             "justMyCode": false
         },
@@ -19,11 +19,12 @@
             "name": "Python: nerf viz",
             "type": "debugpy",
             "request": "launch",
-            "program": "visualize.py",
+            "program": "main.py",
             "console": "integratedTerminal",
             "args": [
-                "--config=config/nerf_config.yaml",
+                "--config=config/neus_config.yaml",
                 "--ckpt=path/to/checkpoint.ckpt",
+                "--visualize"
             ],
             "justMyCode": false
         },
