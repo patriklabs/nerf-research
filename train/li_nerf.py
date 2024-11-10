@@ -134,6 +134,9 @@ class LiNerf(pl.LightningModule):
                 f"train/plot", make_grid(result["plot"], 4), self.global_step
             )
 
+        if "s" in result:
+            self.log("train/s", result["s"])
+
         self.log("train/loss", loss)
 
         self.log("train/psnr", mse2psnr(img2mse(color_gt, result["color_high_res"])))
