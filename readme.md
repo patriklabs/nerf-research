@@ -19,7 +19,7 @@ Create a sparse reconstriction of a set of images
 
 ## Run using docker
 
-Run `./docker/build.sh` to create the nerf image and then run `./docker/run.sh <path/to dataset> <path/to/config.yaml>` to start a training session or  `./docker/run.sh <path/to dataset> <path/to/config.yaml> <path/to/ckpt> --visualize` to export
+Update add or update a config file in the config folder. Run `./docker/build.sh` to create the docker image and then run `./docker/run.sh <path/to dataset> <path/to/config.yaml>` to start a training session or  `./docker/run.sh <path/to dataset> <path/to/config.yaml> <path/to/ckpt> --visualize` to export
 a mesh from the nerf.
 
 E.g.
@@ -35,8 +35,4 @@ Update devcontainer.json to map the folder containing database to the /database 
 
     -v=/path/to/database/:/database:rw
 
-Update the dataset path in the config file to point to the reconstruction
-
-    dataset_path: /database/path/to/data/dense
-
-Launch nerf task for training and nerf vis task for an 3d mesh export
+Update add or update a config file in the config folder and then launch the nerf task for training and the nerf vis task for a 3d mesh export
