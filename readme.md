@@ -5,13 +5,7 @@ This repository contains research and tools for working with Neural Radiance Fie
 1. **Clone the repository** (including submodules):
 
    ```bash
-   git clone --recurse-submodules <repo-url>
-   ```
-
-2. **Initialize and update submodules**:
-
-   ```bash
-   git submodule update --init --recursive
+   git clone --recursive https://github.com/patriklabs/nerf-research.git
    ```
 
 ## Generate Initial Sparse Reconstruction
