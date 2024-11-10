@@ -13,6 +13,11 @@ from nerf.util.util import (
     ray_sphere_intersection_distances_batch,
 )
 
+"""
+Adaptation of Neus: Learning Neural Implicit Surfaces by Volume Rendering for Multi-view Reconstruction
+arxiv: https://arxiv.org/abs/2106.10689
+"""
+
 
 class Nerf(nn.Module):
     def __init__(

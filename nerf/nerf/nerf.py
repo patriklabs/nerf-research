@@ -13,6 +13,11 @@ from nerf.util.util import (
     ray_sphere_intersection_distances_batch,
 )
 
+"""
+Adaptation of NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis
+arxiv: https://arxiv.org/abs/2003.08934
+"""
+
 
 class Nerf(nn.Module):
     def __init__(

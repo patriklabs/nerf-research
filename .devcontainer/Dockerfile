@@ -30,5 +30,6 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     && rm -rf /var/lib/apt/lists/*
 
+ENV TORCH_HOME=/workspace/.cache/torch
 ENV DEBIAN_FRONTEND=dialog
 ENV GRPC_POLL_STRATEGY epoll1

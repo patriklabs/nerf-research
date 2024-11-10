@@ -11,16 +11,46 @@ matplotlib.use("Agg")
 
 
 def make_grid(image, output_nbr):
-    """makes a grid for tensorboard output"""
+    """
+    makes a grid for tensorboard output
+
+    Args:
+        image (torch.Tensor): Image.
+        output_nbr (int): Output number.
+
+    Returns:
+        torch.Tensor: Image grid
+    """
 
     return torchvision.utils.make_grid(image[0:output_nbr], padding=10, pad_value=1.0)
 
 
 def img2mse(x, y):
+    """
+    calculates the mean squared error between two images
+
+    Args:
+        x (torch.Tensor): Image.
+        y (torch.Tensor): Image.
+
+    Returns:
+        torch.Tensor: Mean squared error
+    """
+
     return torch.square(x - y).mean()
 
 
 def mse2psnr(x):
+    """
+    calculates the peak signal to noise ratio from the mean squared error
+
+    Args:
+        x (torch.Tensor): Mean squared error.
+
+    Returns:
+        torch.Tensor: Peak signal to noise ratio
+    """
+
     return -10.0 * torch.log(x) / torch.log(10.0 * torch.ones_like(x))
 
 
