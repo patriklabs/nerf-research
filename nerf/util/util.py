@@ -3,6 +3,62 @@ from typing import List
 import torch
 
 
+import torch
+
+
+def ray_sphere_intersection_distances_batch(O, D, tn_default, tf_default):
+    """
+    Calculate the distances to both intersections of rays with a unit sphere centered at the origin,
+    for a batch of rays.
+
+    Parameters:
+    O (torch.Tensor): The origin points of the rays, shape (batch_size, 3).
+    D (torch.Tensor): The direction vectors of the rays, shape (batch_size, 3).
+    tn_default (float): Default distance to the first intersection for rays with no intersections.
+    tf_default (float): Default distance to the second intersection for rays with no intersections.
+
+    Returns:
+    (torch.Tensor, torch.Tensor): Two tensors of shape (batch_size, 1), representing the distances to the first
+                                  and second intersection points for each ray, or tn_default, tf_default for rays with no intersections.
+    """
+    # Coefficients of the quadratic equation
+    a = torch.sum(D**2, dim=1)
+    b = 2 * torch.sum(O * D, dim=1)
+    c = torch.sum(O**2, dim=1) - 1
+
+    # Calculate the discriminant
+    discriminant = b**2 - 4 * a * c
+
+    # Initialize distances with NaN for rays with no intersection
+    t1_distances = torch.full_like(discriminant, tn_default)
+    t2_distances = torch.full_like(discriminant, tf_default)
+
+    # Case where discriminant == 0 (tangent intersection)
+    tangent_intersection = discriminant == 0
+    t_tangent = -b / (2 * a)
+    t1_distances[tangent_intersection & (t_tangent >= 0)] = t_tangent[
+        tangent_intersection & (t_tangent >= 0)
+    ]
+    t2_distances[tangent_intersection & (t_tangent >= 0)] = t_tangent[
+        tangent_intersection & (t_tangent >= 0)
+    ]
+
+    # Case where discriminant > 0 (two intersections)
+    two_intersections = discriminant > 0
+    sqrt_discriminant = torch.sqrt(discriminant[two_intersections])
+    t1 = (-b[two_intersections] - sqrt_discriminant) / (2 * a[two_intersections])
+    t2 = (-b[two_intersections] + sqrt_discriminant) / (2 * a[two_intersections])
+
+    # Assign both intersection distances
+    t1_distances[two_intersections] = t1
+    t2_distances[two_intersections] = t2
+
+    t1_distances = t1_distances.clamp(tn_default, tf_default)
+    t2_distances = t2_distances.clamp(tn_default, tf_default)
+
+    return t1_distances.unsqueeze(-1), t2_distances.unsqueeze(-1)
+
+
 def ray_to_points(ray, t) -> List[torch.Tensor]:
 
     o, d = torch.split(ray.unsqueeze(-2), [3, 3], dim=-1)

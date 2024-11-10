@@ -7,7 +7,11 @@ from PIL import Image
 from torch import nn
 
 from nerf.neus.nerf_render import NerfRender
-from nerf.util.util import resample, uniform_sample
+from nerf.util.util import (
+    resample,
+    uniform_sample,
+    ray_sphere_intersection_distances_batch,
+)
 
 
 class Nerf(nn.Module):
@@ -33,13 +37,16 @@ class Nerf(nn.Module):
         # tn = torch.zeros_like(tn)
         # tf = 3 * torch.ones_like(tf)
 
+        o, d = torch.split(rays, [3, 3], dim=-1)
+        tn, tf = ray_sphere_intersection_distances_batch(o, d, 0, 3)
+
         with torch.no_grad():
 
             t_low_res = uniform_sample(tn, tf, self.low_res_bins)
 
             # do one round to find out important sampling regions
             (_, _, w_low_res, t_low_res), _ = self.render.forward(
-                rays, t_low_res, self.s_inv_fixed_log, False
+                rays, t_low_res, self.s_inv_learned_log + 0.5, False
             )
 
             # sample according to w
@@ -55,6 +62,7 @@ class Nerf(nn.Module):
             "color_high_res": color_high_res,
             "depth": depth,
             "eikonal_loss": eikonal_loss,
+            "s": torch.exp(-self.s_inv_learned_log),
         }
 
         if step % 100 == 0 and self.training:

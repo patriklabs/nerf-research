@@ -11,7 +11,7 @@ def integrate_ray_unbiased(
     t: torch.Tensor, sdf: torch.Tensor, color: torch.Tensor, s_inv_log: torch.Tensor
 ):
 
-    q = (sdf * torch.exp(s_inv_log)).sigmoid()
+    q = (sdf * torch.exp(-s_inv_log)).sigmoid()
 
     alpha = ((q[..., :-1, :] - q[..., 1:, :] + 1e-5) / (q[..., :-1, :] + 1e-5)).clip(
         0.0, 1.0
@@ -91,7 +91,7 @@ class NerfRender(nn.Module):
 
         sigma, color, eikonal_loss = self.evaluate_ray(ray, t, return_eikonal_loss)
 
-        return integrate_ray_biased(t, sigma, color, s_inv_log), eikonal_loss
+        return integrate_ray_unbiased(t, sigma, color, s_inv_log), eikonal_loss
 
     def evaluate(self, x, max_chunk=2048):
 

@@ -7,7 +7,11 @@ from PIL import Image
 from torch import nn
 
 from nerf.nerf.nerf_render import NerfRender
-from nerf.util.util import resample, uniform_sample
+from nerf.util.util import (
+    resample,
+    uniform_sample,
+    ray_sphere_intersection_distances_batch,
+)
 
 
 class Nerf(nn.Module):
@@ -32,6 +36,9 @@ class Nerf(nn.Module):
 
         # tn = torch.zeros_like(tn)
         # tf = 3 * torch.ones_like(tf)
+
+        o, d = torch.split(rays, [3, 3], dim=-1)
+        tn, tf = ray_sphere_intersection_distances_batch(o, d, 0, 3)
 
         t_low_res = uniform_sample(tn, tf, self.low_res_bins)
 

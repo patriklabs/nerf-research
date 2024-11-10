@@ -20,6 +20,7 @@ class NerfVisualizer:
     ) -> None:
         self.device = device
         self.nerf_render = nerf_render.to(device)
+        self.nerf_render.eval()
         self.limits = [
             x_limit[0],
             x_limit[1],

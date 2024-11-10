@@ -169,9 +169,9 @@ class ColmapSolution:
     def unit_transformations(self):
 
         points = [point.xyz for k, point in self.points.items()]
-        camera_o = [image_to_camera_center(image) for k, image in self.images.items()]
+        # camera_o = [image_to_camera_center(image) for k, image in self.images.items()]
 
-        points.extend(camera_o)
+        # points.extend(camera_o)
 
         x = np.array(points)
         x = np.transpose(x, (1, 0))
