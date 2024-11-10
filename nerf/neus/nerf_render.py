@@ -55,18 +55,18 @@ class NerfRender(nn.Module):
 
         self.nerf_color = NerfColor(Ld)
 
-    def evaluate_ray(self, ray, t):
+    def evaluate_ray(self, ray, t, return_eikonal_loss=True):
 
         x, d = ray_to_points(ray, t)
 
-        if self.training:
+        if self.training and return_eikonal_loss:
             x.requires_grad_(True)
 
         sdf_values, F = self.nerf_density(x)
 
         eikonal_loss = 0
 
-        if self.training:
+        if self.training and return_eikonal_loss:
             d_output = torch.ones_like(sdf_values)
             gradients = torch.autograd.grad(
                 outputs=sdf_values,
@@ -85,11 +85,11 @@ class NerfRender(nn.Module):
 
         return sdf_values, color, eikonal_loss
 
-    def forward(self, ray, t, s_inv_log):
+    def forward(self, ray, t, s_inv_log, return_eikonal_loss=True):
 
         t, _ = torch.sort(t, dim=-2)
 
-        sigma, color, eikonal_loss = self.evaluate_ray(ray, t)
+        sigma, color, eikonal_loss = self.evaluate_ray(ray, t, return_eikonal_loss)
 
         return integrate_ray_biased(t, sigma, color, s_inv_log), eikonal_loss
 

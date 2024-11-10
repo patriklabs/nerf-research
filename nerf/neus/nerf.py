@@ -30,30 +30,28 @@ class Nerf(nn.Module):
 
     def forward(self, rays, tn, tf, step):
 
-        # tn = torch.zeros_like(tn)
-        # tf = 3 * torch.ones_like(tf)
-
-        t_low_res = uniform_sample(tn, tf, self.low_res_bins)
-
-        # do one round to find out important sampling regions
-        (_, _, w_low_res, t_low_res), eikonal_loss_low_res = self.render.forward(
-            rays, t_low_res, self.s_inv_fixed_log
-        )
-
         with torch.no_grad():
+
+            t_low_res = uniform_sample(tn, tf, self.low_res_bins)
+
+            # do one round to find out important sampling regions
+            (_, _, w_low_res, t_low_res), _ = self.render.forward(
+                rays, t_low_res, self.s_inv_fixed_log, False
+            )
+
             # sample according to w
             t_resamp = resample(w_low_res, t_low_res, self.high_res_bins)
 
         t_resamp = torch.cat((t_low_res, t_resamp), dim=1)
 
-        (color_high_res, depth, w, t), eikonal_loss_high_res = self.render.forward(
+        (color_high_res, depth, w, t), eikonal_loss = self.render.forward(
             rays, t_resamp, self.s_inv_learned_log
         )
 
         results = {
             "color_high_res": color_high_res,
             "depth": depth,
-            "eikonal_loss": (eikonal_loss_low_res + eikonal_loss_high_res) / 2.0,
+            "eikonal_loss": eikonal_loss,
         }
 
         if step % 100 == 0 and self.training:
