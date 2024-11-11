@@ -8,3 +8,4 @@ trimesh
 pycollada
 matplotlib
 torchmetrics[image]
+opencv-python-headless

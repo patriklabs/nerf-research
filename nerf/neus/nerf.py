@@ -27,11 +27,12 @@ class Nerf(nn.Module):
         homogeneous_projection=True,
         low_res_bins=64,
         high_res_bins=128,
-        **kwargs
+        biased_integration=True,
+        **kwargs,
     ) -> None:
         super().__init__()
 
-        self.render = NerfRender(Lp, Ld, homogeneous_projection)
+        self.render = NerfRender(Lp, Ld, homogeneous_projection, biased_integration)
         self.low_res_bins = low_res_bins
         self.high_res_bins = high_res_bins
         self.s_inv_learned_log = nn.Parameter(torch.tensor(-4.0))

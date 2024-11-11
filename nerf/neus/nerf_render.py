@@ -48,12 +48,14 @@ def integrate_ray_biased(
 
 class NerfRender(nn.Module):
 
-    def __init__(self, Lp, Ld, homogeneous_projection) -> None:
+    def __init__(self, Lp, Ld, homogeneous_projection, biased_integration) -> None:
         super().__init__()
 
         self.nerf_density = NerfDensity(Lp, homogeneous_projection)
 
         self.nerf_color = NerfColor(Ld)
+
+        self.biased_integration = biased_integration
 
     def evaluate_ray(self, ray, t, return_eikonal_loss=True):
 
@@ -91,7 +93,10 @@ class NerfRender(nn.Module):
 
         sigma, color, eikonal_loss = self.evaluate_ray(ray, t, return_eikonal_loss)
 
-        return integrate_ray_unbiased(t, sigma, color, s_inv_log), eikonal_loss
+        if self.biased_integration:
+            return integrate_ray_biased(t, sigma, color, s_inv_log), eikonal_loss
+        else:
+            return integrate_ray_unbiased(t, sigma, color, s_inv_log), eikonal_loss
 
     def evaluate(self, x, max_chunk=2048):
 

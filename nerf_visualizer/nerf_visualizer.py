@@ -57,7 +57,7 @@ class NerfVisualizer:
 
             print("fraction occupied", np.mean(sigma > self.threshold))
 
-            vertices, triangles = mcubes.marching_cubes(-sigma, self.threshold)
+            vertices, triangles = mcubes.marching_cubes(sigma, self.threshold)
 
             scale = np.array([x_max - x_min, y_max - y_min, z_max - z_min]) / (
                 self.nbr_samples - 1

@@ -18,7 +18,7 @@ model:
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
-    dataset_path: "/database/nerf/rome_fountain/dense"
+    dataset_path: "/database/nerf/statue/exported/dense"
     split: true
     batch: 1024
     num_workers: 16
