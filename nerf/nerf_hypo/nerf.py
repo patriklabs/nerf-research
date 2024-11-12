@@ -28,6 +28,7 @@ class Nerf(nn.Module):
         Lp=10,
         Ld=4,
         bins=32,
+        bins_hypo=128,
         homogeneous_projection=True,
         mixtures=4,
         ray_boundary=RayBoundaryUnitSphere(),
@@ -35,6 +36,7 @@ class Nerf(nn.Module):
     ) -> None:
         super().__init__()
         self.bins = bins
+        self.bins_hypo = bins_hypo
         self.render = NerfRender(Lp, Ld, homogeneous_projection)
         self.nerf_limit = NerfLimit(Lp, homogeneous_projection, k=mixtures)
         self.ray_boundary = ray_boundary
@@ -47,11 +49,18 @@ class Nerf(nn.Module):
 
         pi, mu, std = self.nerf_limit(rays)
 
-        t_g = mu + 2.0 * std * torch.randn(
-            [*t.shape[0:-1], pi.shape[-1]], device=pi.device, dtype=pi.dtype
+        t_g = mu + std * torch.randn(
+            [t.shape[0], self.bins_hypo, pi.shape[-1]],
+            device=pi.device,
+            dtype=pi.dtype,
         )
 
-        u = torch.rand_like(t)
+        u = torch.rand(
+            [t.shape[0], self.bins_hypo, 1],
+            dtype=t.dtype,
+            layout=t.layout,
+            device=t.device,
+        )
 
         cat = draw_categorical(pi, u)
 

@@ -13,6 +13,7 @@ model:
         Lp: 10
         Ld: 4
         bins: 32
+        bins_hypo: 128
         homogeneous_projection: true
         mixtures: 4
         ray_boundary: 
