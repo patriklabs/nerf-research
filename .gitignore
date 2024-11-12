@@ -152,6 +152,7 @@ config_server.yml
 
 *.txt
 *.json
+!.vscode/settings.json
 !requirements.txt
 !devcontainer.json
 !launch.json
