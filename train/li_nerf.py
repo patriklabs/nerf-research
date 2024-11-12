@@ -1,4 +1,3 @@
-from typing import Any
 import lightning as pl
 import torch
 import torchvision
@@ -89,7 +88,7 @@ class LiNerf(pl.LightningModule):
             depth = to_image(depth, B, H, W)
 
             self.logger.experiment.add_image(
-                f"val/img_rendered", make_grid(color, 4), self.global_step + batch_idx
+                "val/img_rendered", make_grid(color, 4), self.global_step + batch_idx
             )
 
             depth_max = torch.max(depth.view(B, -1, H * W), dim=-1, keepdim=True)[
@@ -102,11 +101,11 @@ class LiNerf(pl.LightningModule):
             depth = (depth - depth_min) / (depth_max - depth_min)
 
             self.logger.experiment.add_image(
-                f"val/depth_rendered", make_grid(depth, 4), self.global_step + batch_idx
+                "val/depth_rendered", make_grid(depth, 4), self.global_step + batch_idx
             )
 
             self.logger.experiment.add_image(
-                f"val/img_gt", make_grid(image, 4), self.global_step + batch_idx
+                "val/img_gt", make_grid(image, 4), self.global_step + batch_idx
             )
 
             self.log("val/lpips", self.lpips(color.clamp(0, 1), image))
@@ -161,7 +160,7 @@ class LiNerf(pl.LightningModule):
         if "plot" in result:
 
             self.logger.experiment.add_image(
-                f"train/plot", make_grid(result["plot"], 4), self.global_step
+                "train/plot", make_grid(result["plot"], 4), self.global_step
             )
 
         if "s" in result:

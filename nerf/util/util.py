@@ -3,10 +3,7 @@ from typing import List
 import torch
 
 
-import torch
-
-
-def ray_sphere_intersection_distances_batch(O, D, tn_default, tf_default):
+def ray_sphere_intersection_distances_batch(orig, dir, tn_default, tf_default):
     """
     Calculate the distances to both intersections of rays with a unit sphere centered at the origin,
     for a batch of rays.
@@ -22,9 +19,9 @@ def ray_sphere_intersection_distances_batch(O, D, tn_default, tf_default):
                                     and second intersection points for each ray, or tn_default, tf_default for rays with no intersections.
     """
     # Coefficients of the quadratic equation
-    a = torch.sum(D**2, dim=1)
-    b = 2 * torch.sum(O * D, dim=1)
-    c = torch.sum(O**2, dim=1) - 1
+    a = torch.sum(dir**2, dim=1)
+    b = 2 * torch.sum(orig * dir, dim=1)
+    c = torch.sum(orig**2, dim=1) - 1
 
     # Calculate the discriminant
     discriminant = b**2 - 4 * a * c

@@ -69,9 +69,6 @@ def intrinsic_vec_to_matrix(intrinsics):
     return K
 
 
-import numpy as np
-
-
 def sphere_point_cloud(radius=1, num_points=1000):
     """
     Generate a point cloud on the surface of a sphere.
@@ -84,7 +81,8 @@ def sphere_point_cloud(radius=1, num_points=1000):
     - A NumPy array of shape (num_points, 3) representing the 3D coordinates of points on the sphere.
     """
     # Generate random angles for spherical coordinates
-    phi = np.random.uniform(0, np.pi, num_points)  # Angle from the z-axis (0 to pi)
+    # Angle from the z-axis (0 to pi)
+    phi = np.random.uniform(0, np.pi, num_points)
     theta = np.random.uniform(
         0, 2 * np.pi, num_points
     )  # Angle from the x-axis (0 to 2*pi)
@@ -186,8 +184,6 @@ class ColmapSolution:
 
         s = np.max(dists, keepdims=True)
 
-        # s = iqr(np.abs(x_cen).reshape(-1))[1]
-
         T = np.eye(4, 4)
 
         T[0:3, 0:3] = s * np.eye(3, 3)
@@ -197,9 +193,8 @@ class ColmapSolution:
 
         T = 1 / s * T
 
-        ### test ###
         """
-
+        check
         x = to_homogen(x)
         x = Tinv@x
 
@@ -209,6 +204,7 @@ class ColmapSolution:
 
         s = np.max(np.linalg.norm(x_cen[0:3], axis=0), keepdims=True)
         """
+
         return T, Tinv
 
     def unit_rescale(self):

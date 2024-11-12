@@ -2,7 +2,6 @@ import torch
 from torch import nn
 
 from nerf.util.embedding import Embedding
-from nerf.util.noise_layer import Noise
 
 
 class NerfDensity(nn.Module):

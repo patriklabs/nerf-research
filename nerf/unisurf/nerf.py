@@ -1,5 +1,4 @@
 from torch import nn
-from distutils.util import strtobool
 from nerf.unisurf.nerf_render import NerfRender
 from nerf.util.util import uniform_sample, resample
 import torch

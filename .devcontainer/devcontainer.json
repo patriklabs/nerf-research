@@ -9,7 +9,8 @@
 				"ms-python.black-formatter",
 				"redhat.vscode-yaml",
 				"ms-toolsai.tensorboard",
-				"ms-python.isort"
+				"ms-python.isort",
+				"ms-python.flake8"
 			],
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "bash"
