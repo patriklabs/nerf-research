@@ -13,7 +13,7 @@ This repository contains research and tools for working with Neural Radiance Fie
 1. **Build the COLMAP Docker image**:
 
    ```bash
-   ./colmap/build_docker.sh
+   cd colmap && ./build_docker.sh
    ```
 
 2. **Create a sparse reconstruction of a dataset**:
@@ -21,7 +21,7 @@ This repository contains research and tools for working with Neural Radiance Fie
    Run COLMAP on your data to generate a sparse reconstruction by specifying the path to your dataset:
 
    ```bash
-   ./colmap/docker_run.sh /path/to/data
+   cd colmap && ./docker_run.sh /path/to/data
    ```
 
 ## Running NeRF with Docker
