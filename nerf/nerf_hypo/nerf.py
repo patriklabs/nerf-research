@@ -6,9 +6,10 @@ import torch
 from PIL import Image
 from torch import nn
 
-from nerf.nerf.kl_div import kl_gauss
-from nerf.nerf.nerf_hypothesis_net import NerfLimit
+from .kl_div import kl_gauss
+from .nerf_hypothesis_net import NerfLimit
 from nerf.nerf.nerf_render import NerfRender
+from nerf.util.boundary import RayBoundaryUnitSphere
 from nerf.util.util import uniform_sample
 
 
@@ -23,17 +24,24 @@ def draw_categorical(pi, u):
 
 class Nerf(nn.Module):
     def __init__(
-        self, Lp=10, Ld=4, bins=32, homogeneous_projection=True, mixtures=4, **kwargs
+        self,
+        Lp=10,
+        Ld=4,
+        bins=32,
+        homogeneous_projection=True,
+        mixtures=4,
+        ray_boundary=RayBoundaryUnitSphere(),
+        **kwargs
     ) -> None:
         super().__init__()
         self.bins = bins
         self.render = NerfRender(Lp, Ld, homogeneous_projection)
         self.nerf_limit = NerfLimit(Lp, homogeneous_projection, k=mixtures)
+        self.ray_boundary = ray_boundary
 
     def forward(self, rays, tn, tf, step):
 
-        # tn = torch.zeros_like(tn)
-        # tf = 3 * torch.ones_like(tf)
+        tn, tf = self.ray_boundary.boundary(rays, tn, tf)
 
         t = uniform_sample(tn, tf, self.bins)
 

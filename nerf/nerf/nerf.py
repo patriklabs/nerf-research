@@ -7,11 +7,8 @@ from PIL import Image
 from torch import nn
 
 from nerf.nerf.nerf_render import NerfRender
-from nerf.util.util import (
-    resample,
-    uniform_sample,
-    ray_sphere_intersection_distances_batch,
-)
+from nerf.util.boundary import RayBoundaryUnitSphere
+from nerf.util.util import resample, uniform_sample
 
 """
 Adaptation of NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis
@@ -27,6 +24,7 @@ class Nerf(nn.Module):
         homogeneous_projection=True,
         low_res_bins=64,
         high_res_bins=128,
+        ray_boundary=RayBoundaryUnitSphere(),
         **kwargs
     ) -> None:
         super().__init__()
@@ -36,14 +34,11 @@ class Nerf(nn.Module):
         self.render_low_res = NerfRender(Lp, Ld, homogeneous_projection)
         self.low_res_bins = low_res_bins
         self.high_res_bins = high_res_bins
+        self.ray_boundary = ray_boundary
 
     def forward(self, rays, tn, tf, step):
 
-        # tn = torch.zeros_like(tn)
-        # tf = 3 * torch.ones_like(tf)
-
-        o, d = torch.split(rays, [3, 3], dim=-1)
-        tn, tf = ray_sphere_intersection_distances_batch(o, d, 0, 3)
+        tn, tf = self.ray_boundary.boundary(rays, tn, tf)
 
         t_low_res = uniform_sample(tn, tf, self.low_res_bins)
 

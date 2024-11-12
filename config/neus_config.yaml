@@ -16,6 +16,8 @@ model:
         high_res_bins: 128
         homogeneous_projection: true
         biased_integration: true
+        ray_boundary: 
+          class_path: nerf.util.boundary.RayBoundaryLimits
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
@@ -26,7 +28,7 @@ datamodule:
     width: 320
     height: 320
 visualizer:
-  samples: 256
+  samples: 512
   threshold: 0
   name: "output_mesh"
   x_limit: [-1, 1]

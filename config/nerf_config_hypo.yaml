@@ -8,17 +8,19 @@ model:
   class_path: "train.li_nerf.LiNerf"
   init_args:
     model:
-      class_path: "nerf.nerf.nerf_hypothesis.Nerf"
+      class_path: "nerf.nerf_hypo.nerf.Nerf"
       init_args:
         Lp: 10
         Ld: 4
         bins: 32
         homogeneous_projection: true
         mixtures: 4
+        ray_boundary: 
+          class_path: nerf.util.boundary.RayBoundaryLimits
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
-    dataset_path: "/database/nerf/v_data/dense"
+    dataset_path: "/database/nerf/statue/exported/dense"
     split: false
     batch: 1024
     num_workers: 16
@@ -28,6 +30,6 @@ visualizer:
   samples: 256
   threshold: 50
   name: "output_mesh"
-  x_limit: [-0.3, 0.3]
-  y_limit: [-0.3, 0.3]
-  z_limit: [-0.2, 0.4]
+  x_limit: [-1, 1]
+  y_limit: [-1, 1]
+  z_limit: [-1, 1]

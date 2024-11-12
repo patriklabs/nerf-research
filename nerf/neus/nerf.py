@@ -7,11 +7,8 @@ from PIL import Image
 from torch import nn
 
 from nerf.neus.nerf_render import NerfRender
-from nerf.util.util import (
-    resample,
-    uniform_sample,
-    ray_sphere_intersection_distances_batch,
-)
+from nerf.util.boundary import RayBoundaryUnitSphere
+from nerf.util.util import resample, uniform_sample
 
 """
 Adaptation of Neus: Learning Neural Implicit Surfaces by Volume Rendering for Multi-view Reconstruction
@@ -28,6 +25,7 @@ class Nerf(nn.Module):
         low_res_bins=64,
         high_res_bins=128,
         biased_integration=True,
+        ray_boundary=RayBoundaryUnitSphere(),
         **kwargs,
     ) -> None:
         super().__init__()
@@ -36,15 +34,11 @@ class Nerf(nn.Module):
         self.low_res_bins = low_res_bins
         self.high_res_bins = high_res_bins
         self.s_inv_learned_log = nn.Parameter(torch.tensor(-4.0))
-        self.register_buffer("s_inv_fixed_log", torch.tensor(-4.0))
+        self.ray_boundary = ray_boundary
 
     def forward(self, rays, tn, tf, step):
 
-        # tn = torch.zeros_like(tn)
-        # tf = 3 * torch.ones_like(tf)
-
-        o, d = torch.split(rays, [3, 3], dim=-1)
-        tn, tf = ray_sphere_intersection_distances_batch(o, d, 0, 3)
+        tn, tf = self.ray_boundary.boundary(rays, tn, tf)
 
         with torch.no_grad():
 

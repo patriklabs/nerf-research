@@ -15,6 +15,8 @@ model:
         low_res_bins: 64
         high_res_bins: 128
         homogeneous_projection: true
+        ray_boundary: 
+          class_path: nerf.util.boundary.RayBoundaryLimits
 datamodule:
   class_path: "datamodule.datamodule.DataModule"
   init_args:
