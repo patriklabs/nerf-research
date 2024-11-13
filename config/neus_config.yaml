@@ -10,7 +10,7 @@ model:
     model:
       class_path: "nerf.neus.nerf.Nerf"
       init_args:
-        s_inv_log_init: -3
+        s_inv_log_init: -3.0
         Lp: 10
         Ld: 4
         low_res_bins: 64
