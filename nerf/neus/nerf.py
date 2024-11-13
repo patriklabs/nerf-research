@@ -19,6 +19,7 @@ arxiv: https://arxiv.org/abs/2106.10689
 class Nerf(nn.Module):
     def __init__(
         self,
+        s_inv_log_init=-4.0,
         Lp=10,
         Ld=4,
         homogeneous_projection=True,
@@ -33,7 +34,7 @@ class Nerf(nn.Module):
         self.render = NerfRender(Lp, Ld, homogeneous_projection, biased_integration)
         self.low_res_bins = low_res_bins
         self.high_res_bins = high_res_bins
-        self.s_inv_learned_log = nn.Parameter(torch.tensor(-4.0))
+        self.s_inv_learned_log = nn.Parameter(torch.tensor(s_inv_log_init))
         self.ray_boundary = ray_boundary
 
     def forward(self, rays, tn, tf, step):
