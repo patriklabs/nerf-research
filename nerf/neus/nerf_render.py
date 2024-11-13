@@ -43,7 +43,7 @@ def logistic_density_function(x, s_inv_log):
 def integrate_ray_biased(
     t: torch.Tensor, sdf: torch.Tensor, color: torch.Tensor, s_inv_log: torch.Tensor
 ):
-    return integrate_ray(t, logistic_density_function(sdf, s_inv_log), color)
+    return integrate_ray(t, logistic_density_function(sdf, s_inv_log), color, False)
 
 
 class NerfRender(nn.Module):
