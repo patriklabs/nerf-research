@@ -21,6 +21,7 @@
 	"runArgs": [
 		"-v=/database:/database:rw",
 		"--gpus=all",
+		"--shm-size=8G",
 		"--rm"
 	],
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
